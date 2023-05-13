@@ -2,7 +2,7 @@
 #include <QString>
 
 #include "src/model/Ohlander.h"
-#include "src/model/Dbscan.h"
+#include "src/model/KMeans.h"
 #include "src/model/Bgsegm.h"
 #include "src/model/Substruction.h"
 

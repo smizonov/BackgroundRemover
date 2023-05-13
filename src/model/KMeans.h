@@ -11,13 +11,13 @@ class Kmeans : public BgRemover
 public:
 //    Ohlander();
 
-    void start(BgRemoverSettings) override;
+    void start(BgRemoverSettingsPtr) override;
 
 private:
     cv::Mat performKmeans(cv::Mat src);
 
 private:
-    BgRemoverSettings settings_;
+    BgRemoverSettingsPtr settings_;
 };
 
 }

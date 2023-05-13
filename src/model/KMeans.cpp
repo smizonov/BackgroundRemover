@@ -4,7 +4,7 @@
 #include <opencv2/core/types.hpp>
 #include <vector>
 
-#include "Dbscan.h"
+#include "KMeans.h"
 #include "MaskEditor.h"
 
 namespace backgroundRemover{
@@ -123,21 +123,21 @@ void dbscan(const std::vector<std::vector<double>>& feature_points, double eps, 
 //    return 0;
 //}
 
-void Kmeans::start(BgRemoverSettings settings)
+void Kmeans::start(BgRemoverSettingsPtr settings)
 {
-    for (auto path : std::filesystem::directory_iterator(settings.srcFolderPath()))
+    for (auto path : std::filesystem::directory_iterator(settings->srcFolderPath()))
     {
         cv::Mat tmpFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
         auto preDst = performKmeans(std::move(tmpFrame));
         auto dst = MaskEditor::removeNoise(std::move(preDst));
-        auto dstPath = dstFolderPath / path.path().filename();
+        auto dstPath = settings->dstFolderPath() / path.path().filename();
         cv::imwrite(dstPath.string(), dst);
     }
 }
 
 cv::Mat Kmeans::performKmeans(cv::Mat src)
 {
-    cv::Mat image = cv::imread(src);
+    cv::Mat image = src;
 
     // Reshape the image to a 2D matrix of pixels
     auto reshapedImage = image.reshape(1, image.rows * image.cols);

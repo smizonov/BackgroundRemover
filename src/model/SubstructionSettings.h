@@ -15,8 +15,16 @@ public:
         , bgImagePath_(bgImagePath)
     {}
 
+    SubstructionSettings(SubstructionSettings &&) = default;
+    std::filesystem::path const & bgImagePath()
+    {
+        return bgImagePath_;
+    }
+
 protected:
     std::filesystem::path bgImagePath_;
 };
+
+using SubstructionSettingsPtr = std::shared_ptr<SubstructionSettings>;
 
 }

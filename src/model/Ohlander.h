@@ -1,4 +1,6 @@
 #include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
 
 #include "BgRemover.h"
 
@@ -7,12 +9,17 @@ namespace backgroundRemover{
 class Ohlander : public BgRemover
 {
 public:
-    static void start(BgRemoverSettings) override;
+    void start(BgRemoverSettingsPtr) override;
 
 private:
-    void startImpl(BgRemoverSettings);
+    void startImpl(std::filesystem::path srcPath, std::filesystem::path dstPath);
     void prepareImage();
-    void OhlanderFunc();
+    void OhlanderFunc(
+        std::vector<cv::Mat> & result_masks,
+        std::vector<cv::Mat> & mask_stack,
+        std::vector<cv::Mat> & result_vector,
+        std::vector<cv::Mat> & channels,
+        std::vector<cv::Mat> & channels_hist);
 };
 
 }

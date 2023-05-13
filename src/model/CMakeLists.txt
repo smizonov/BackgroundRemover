@@ -13,8 +13,8 @@ FetchContent_MakeAvailable(dlib)
 set(SOURCES
     Ohlander.cpp
     Ohlander.h
-    Dbscan.cpp
-    Dbscan.h
+    KMeans.cpp
+    KMeans.h
     Bgsegm.cpp
     Bgsegm.h
 Substruction.cpp
@@ -22,7 +22,7 @@ Substruction.h
 BgRemover.h
 BgRemover.cpp
 BgRemoverSettings.h
-SubsctructionSettings.h
+SubstructionSettings.h
 MaskEditor.cpp
 MaskEditor.h)
 

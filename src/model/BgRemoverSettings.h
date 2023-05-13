@@ -26,6 +26,7 @@ public:
         return dstFolderPath_;
     }
 
+    virtual ~BgRemoverSettings() = default;
 private:
     std::filesystem::path srcFolderPath_;
     std::filesystem::path dstFolderPath_;

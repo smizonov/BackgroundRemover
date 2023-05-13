@@ -6,14 +6,14 @@
 #include <opencv2/core.hpp>
 #include <opencv2/video/background_segm.hpp>
 
+#include <BgRemover.h>
+
 namespace backgroundRemover{
 
-class Substruction
+class Substruction : public BgRemover
 {
 public:
-//    Ohlander();
-
-    static void start(std::filesystem::path srcDir, std::filesystem::path dstFolderPath);
+    void start(BgRemoverSettingsPtr) override;
 
 private:
     static cv::Mat substruct(

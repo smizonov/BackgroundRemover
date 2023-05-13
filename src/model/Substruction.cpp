@@ -7,8 +7,10 @@
 //#include <opencv2/bgsegm.hpp>
 #include <string>
 
+#include "SubstructionSettings.h"
 
 #include "Substruction.h"
+#include "MaskEditor.h"
 
 using namespace std;
 using namespace cv;
@@ -59,26 +61,19 @@ static void refineSegments(const Mat& img, Mat& mask, Mat& dst)
     drawContours( dst, contours, largestComp, color, FILLED, LINE_8, hierarchy );
 }
 
-void Substruction::start(
-    std::filesystem::path srcFolderPath,
-    std::filesystem::path dstFolderPath)
+void Substruction::start(BgRemoverSettingsPtr settings)
 {
-//    bgsubtractor->setVarThreshold(10);
+    auto subscriptionSettings = std::dynamic_pointer_cast<SubstructionSettings>(settings);
+    Mat firstFrame = cv::imread(subscriptionSettings->bgImagePath().string(), cv::IMREAD_GRAYSCALE);
 
-    Mat firstFrame;
-
-    bool firstFrameStored{ false };
-    for (auto path : std::filesystem::directory_iterator(srcFolderPath))
+    for (auto path : std::filesystem::directory_iterator(subscriptionSettings->srcFolderPath()))
     {
-        if (!firstFrameStored)
-        {
-            firstFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
-            firstFrameStored = true;
-        }
         cv::Mat tmpFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
         auto dstFrame = substruct(firstFrame, tmpFrame);
-        auto dstPath = dstFolderPath / path.path().filename();
-        imwrite(dstPath.string(), dstFrame);
+        auto dstPath = settings->dstFolderPath() / path.path().filename();
+        cv::Mat invertedFrame;
+        cv::bitwise_not(dstFrame, invertedFrame);
+        imwrite(dstPath.string(), MaskEditor::removeNoise(invertedFrame));
     }
 }
 

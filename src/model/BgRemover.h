@@ -7,10 +7,12 @@
 
 namespace backgroundRemover{
 
+using BgRemoverSettingsPtr = std::shared_ptr<BgRemoverSettings>;
+
 class BgRemover
 {
 public:
-    virtual static void start(BgRemoverSettings) = 0;
+    virtual void start(BgRemoverSettingsPtr) = 0;
 
 private:
     static cv::Mat detectNextSeg(

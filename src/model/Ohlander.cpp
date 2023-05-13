@@ -4,43 +4,40 @@
 
 #include "Ohlander.h"
 
-using namespace std;
-using namespace cv;
-
 namespace backgroundRemover{
 
-vector<Mat> result_masks;
-vector<Mat> mask_stack;
-vector<Mat> result_vector;
+using namespace std;
+using namespace cv;
 
 const int hist_size = 256;
 const float ranges[] = {0, 256};
 const float* hist_ranges = {ranges};
 
-int t;
+const int t = 2;
 
-Mat channels[3];
-Mat channels_hist[3];
-
-Mat public_image;
-
-void OhlanderFunc();
-void generate_mask(Mat, int, int);
+void generate_mask(Mat, int, int, std::vector<cv::Mat> & channels);
 Mat paintResultImage(Mat const & src);
 void calculate_midpoint(Mat hist, int&, int&);
 Mat convertBlackToWhite(Mat const & src);
 
-void Ohlander::start(BgRemoverSettings settings)
+void Ohlander::start(BgRemoverSettingsPtr settings)
 {
-    for (auto path : std::filesystem::directory_iterator(settings.srcFolderPath()))
+    for (auto path : std::filesystem::directory_iterator(settings->srcFolderPath()))
     {
-        cv::Mat tmpFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
-        auto dstFrame = substruct(firstFrame, tmpFrame);
-        auto dstPath = dstFolderPath / path.path().filename();
-        imwrite(dstPath.string(), dstFrame);
+        auto dstPath = settings->dstFolderPath() / path.path().filename();
+        startImpl(path, dstPath);
     }
-    Mat raw_image = imread(srcPath, IMREAD_COLOR);
-    t = 5;//atoi(argv[2]);
+}
+
+void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path dstPath)
+{
+    vector<Mat> result_masks;
+    vector<Mat> mask_stack;
+    vector<Mat> result_vector;
+    vector<Mat> channels(3);
+    vector<Mat> channels_hist(3);
+
+    Mat raw_image = imread(srcPath.string(), IMREAD_COLOR);
 
     if(raw_image.empty()) {
         cerr << "Image format must be valid." << endl;
@@ -48,7 +45,6 @@ void Ohlander::start(BgRemoverSettings settings)
     }
 
     GaussianBlur(raw_image, raw_image, Size(5,5), 8);
-    public_image = raw_image;
 
     split(raw_image, channels);
 
@@ -58,7 +54,12 @@ void Ohlander::start(BgRemoverSettings settings)
 
     mask_stack.push_back(initial_mask);
 
-    OhlanderFunc();
+    OhlanderFunc(
+        result_masks,
+        mask_stack,
+        result_vector,
+        channels,
+        channels_hist);
 
     RNG rng(12345);
     for(int i=0; i<result_vector.size(); i++) {
@@ -72,15 +73,16 @@ void Ohlander::start(BgRemoverSettings settings)
         }
     }
 
-    imwrite(dstPath, dest_image);
-    return;
+//    imwrite(dstPath, dest_image);
+//    return;
     auto dstMask{ paintResultImage(dest_image) };
+
     Mat tmpImage;
     bitwise_and(raw_image, raw_image, tmpImage, dstMask);
     Mat dstImage = convertBlackToWhite(tmpImage);
-    imwrite(dstPath, dstImage);
+    imwrite(dstPath.string(), dstImage);
 
-    waitKey(0);
+//    waitKey(0);
 }
 
 Mat paintResultImage(Mat const & src)
@@ -119,9 +121,12 @@ Mat convertBlackToWhite(Mat const & src)
 
 }
 
-
-
-void OhlanderFunc() {
+void Ohlander::OhlanderFunc(
+    vector<Mat> & result_masks,
+    vector<Mat> & mask_stack,
+    vector<Mat> & result_vector,
+    std::vector<cv::Mat> & channels,
+    std::vector<cv::Mat> & channels_hist) {
 
     if(mask_stack.empty()) {
         return;
@@ -148,7 +153,7 @@ void OhlanderFunc() {
     }
 
     if(found) {
-        generate_mask(channels_hist[index], max_valley, index);
+        generate_mask(channels_hist[index], max_valley, index, channels);
     }
     else {
         result_vector = mask_stack;
@@ -156,7 +161,12 @@ void OhlanderFunc() {
         return;
     }
 
-    OhlanderFunc();
+    OhlanderFunc(
+        result_masks,
+        mask_stack,
+        result_vector,
+        channels,
+        channels_hist);
 }
 
 void calculate_midpoint(Mat hist, int& valley, int& peak) {
@@ -193,7 +203,7 @@ void calculate_midpoint(Mat hist, int& valley, int& peak) {
 
 }
 
-void generate_mask(Mat hist, int valley, int index) {
+void generate_mask(Mat hist, int valley, int index, vector<Mat> & mask_stack, std::vector<cv::Mat> & channels) {
 
     Mat hist_left = hist.clone();
     Mat hist_right = hist.clone();
