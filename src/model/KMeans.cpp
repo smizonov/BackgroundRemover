@@ -1,4 +1,3 @@
-#include <dlib/clustering.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/types.hpp>
@@ -8,8 +7,6 @@
 #include "MaskEditor.h"
 
 namespace backgroundRemover{
-
-using namespace dlib;
 
 double euclidean_distance(const std::vector<double>& point1, const std::vector<double>& point2)
 {
@@ -123,19 +120,24 @@ void dbscan(const std::vector<std::vector<double>>& feature_points, double eps, 
 //    return 0;
 //}
 
-void Kmeans::start(BgRemoverSettingsPtr settings)
+void KMeans::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
 {
+    auto countOfHandledImages{ 0 };
     for (auto path : std::filesystem::directory_iterator(settings->srcFolderPath()))
     {
+        if (stopped_)
+            break;
         cv::Mat tmpFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
         auto preDst = performKmeans(std::move(tmpFrame));
-        auto dst = MaskEditor::removeNoise(std::move(preDst));
+//        auto dst = MaskEditor::removeNoise(std::move(preDst));
         auto dstPath = settings->dstFolderPath() / path.path().filename();
-        cv::imwrite(dstPath.string(), dst);
+        cv::imwrite(dstPath.string(), preDst);
+        handlers.onImageHandle(++countOfHandledImages);
     }
+    handlers.onFinish(std::error_code());
 }
 
-cv::Mat Kmeans::performKmeans(cv::Mat src)
+cv::Mat KMeans::performKmeans(cv::Mat src)
 {
     cv::Mat image = src;
 

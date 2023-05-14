@@ -19,6 +19,9 @@ set(PROJECT_SOURCES
         qml.qrc
         AlgoInterface.h
         AlgoInterface.cpp
+        RmBgMethods.h
+        BgRemoverTask.cpp
+        BgRemoverTask.h
 )
 
 add_subdirectory(src/model)

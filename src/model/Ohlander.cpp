@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "Ohlander.h"
+#include "MaskEditor.h"
 
 namespace backgroundRemover{
 
@@ -12,21 +13,41 @@ using namespace cv;
 const int hist_size = 256;
 const float ranges[] = {0, 256};
 const float* hist_ranges = {ranges};
+int constexpr kMaxSegmentsCount{ 2 };
 
 const int t = 2;
 
-void generate_mask(Mat, int, int, std::vector<cv::Mat> & channels);
+cv::Mat extractCenterSquare(const cv::Mat& image, int n)
+{
+    int centerX = image.cols / 2;
+    int centerY = image.rows / 2;
+
+    int startX = centerX - n / 2;
+    int startY = centerY - n / 2;
+
+    cv::Rect roi(startX, startY, n, n);
+    cv::Mat centerSquare = image(roi).clone();
+
+    return centerSquare;
+}
+
+void generate_mask(Mat, int, int, std::vector<cv::Mat> & masks_stack, std::vector<cv::Mat> & channels);
 Mat paintResultImage(Mat const & src);
 void calculate_midpoint(Mat hist, int&, int&);
 Mat convertBlackToWhite(Mat const & src);
 
-void Ohlander::start(BgRemoverSettingsPtr settings)
+void Ohlander::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
 {
+    auto countOfHandledImages{ 0 };
     for (auto path : std::filesystem::directory_iterator(settings->srcFolderPath()))
     {
+        if (stopped_)
+            break;
         auto dstPath = settings->dstFolderPath() / path.path().filename();
         startImpl(path, dstPath);
+        handlers.onImageHandle(++countOfHandledImages);
     }
+    handlers.onFinish(std::error_code());
 }
 
 void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path dstPath)
@@ -48,33 +69,83 @@ void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path ds
 
     split(raw_image, channels);
 
-    Mat dest_image(raw_image.size(), raw_image.type(), Scalar(0));
+    Mat dest_image(raw_image.size(), CV_8UC1, Scalar(0));
 
     Mat initial_mask(raw_image.size(), CV_8UC1, Scalar(1));
 
     mask_stack.push_back(initial_mask);
+    auto segmentsCount{ 0 };
 
     OhlanderFunc(
         result_masks,
         mask_stack,
         result_vector,
         channels,
-        channels_hist);
+        channels_hist,
+        segmentsCount);
 
-    RNG rng(12345);
-    for(int i=0; i<result_vector.size(); i++) {
-        Vec3b color = Vec3b(rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255));
-        for(int x=0; x<raw_image.rows; x++) {
-            for(int y=0; y<raw_image.cols; y++) {
-                if(result_vector.at(i).at<uchar>(x,y) != 0) {
-                    dest_image.at<Vec3b>(x,y) = color;
-                }
+    std::map<int, int> occupiedPixelsToResultVectorIndex;
+    auto index{ 0u };
+
+//    std::vector<std::pair<int, int>> occupiedPixelsToResultVectorIndex;
+    for (auto const & region : result_vector)
+    {
+        auto center = extractCenterSquare(region, 20);
+        occupiedPixelsToResultVectorIndex[index] = std::count_if(
+            center.begin<uchar>(),
+            center.end<uchar>(),
+            [&index, &occupiedPixelsToResultVectorIndex]
+            (auto const & point)
+            {
+                return static_cast<uchar>(point) != 0;
+            });
+        ++index;
+    }
+
+    int dstIndex = 0;
+    int maxValue = std::numeric_limits<int>::min();
+
+    for (const auto& pair : occupiedPixelsToResultVectorIndex)
+    {
+        if (pair.second > maxValue)
+        {
+            maxValue = pair.second;
+            dstIndex = pair.first;
+        }
+    }
+
+    if (occupiedPixelsToResultVectorIndex.empty())
+        throw std::runtime_error("occupiedPixelsToResultVectorIndex empty!");
+
+
+//    RNG rng(12345);
+//    for(int i=0; i<result_vector.size(); i++) {
+//        Vec3b color = Vec3b(rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255));
+//        for(int x=0; x<raw_image.rows; x++) {
+//            for(int y=0; y<raw_image.cols; y++) {
+//                if(result_vector.at(i).at<uchar>(x,y) != 0) {
+//                    dest_image.at<Vec3b>(x,y) = color;
+//                }
+//            }
+//        }
+//    }
+
+    for(int x=0; x<raw_image.rows; x++) {
+        for(int y=0; y<raw_image.cols; y++) {
+            if(result_vector.at(dstIndex).at<uchar>(x,y) != 0)
+            {
+                dest_image.at<uchar>(x,y) = 255;
+            }
+            else
+            {
+                dest_image.at<uchar>(x,y) = 0;
             }
         }
     }
 
-//    imwrite(dstPath, dest_image);
-//    return;
+    imwrite(dstPath.string(), MaskEditor::removeNoise(dest_image));
+    return;
+
     auto dstMask{ paintResultImage(dest_image) };
 
     Mat tmpImage;
@@ -126,9 +197,12 @@ void Ohlander::OhlanderFunc(
     vector<Mat> & mask_stack,
     vector<Mat> & result_vector,
     std::vector<cv::Mat> & channels,
-    std::vector<cv::Mat> & channels_hist) {
+    std::vector<cv::Mat> & channels_hist,
+    int & segmentsCount) {
 
-    if(mask_stack.empty()) {
+    if(mask_stack.empty() || segmentsCount >= kMaxSegmentsCount) {
+        result_vector = mask_stack;
+        result_vector.insert(result_vector.end(), result_masks.begin(), result_masks.end());
         return;
     }
 
@@ -153,7 +227,8 @@ void Ohlander::OhlanderFunc(
     }
 
     if(found) {
-        generate_mask(channels_hist[index], max_valley, index, channels);
+        generate_mask(channels_hist[index], max_valley, index, mask_stack, channels);
+        segmentsCount += 2;
     }
     else {
         result_vector = mask_stack;
@@ -166,7 +241,8 @@ void Ohlander::OhlanderFunc(
         mask_stack,
         result_vector,
         channels,
-        channels_hist);
+        channels_hist,
+        segmentsCount);
 }
 
 void calculate_midpoint(Mat hist, int& valley, int& peak) {
@@ -200,10 +276,10 @@ void calculate_midpoint(Mat hist, int& valley, int& peak) {
         valley = (hist_map[fmax] + hist_map[smax]) / 2;
         peak = max(fmax, smax);
     }
-
 }
 
-void generate_mask(Mat hist, int valley, int index, vector<Mat> & mask_stack, std::vector<cv::Mat> & channels) {
+void generate_mask(Mat hist, int valley, int index, vector<Mat> & mask_stack, std::vector<cv::Mat> & channels)
+{
 
     Mat hist_left = hist.clone();
     Mat hist_right = hist.clone();

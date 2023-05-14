@@ -8,19 +8,23 @@
 namespace backgroundRemover{
 
 using BgRemoverSettingsPtr = std::shared_ptr<BgRemoverSettings>;
+using OnFinish = std::function<void(std::error_code)>;
+using NuberOfProcessedImages = std::function<void(int count)>;
+
+struct BgRemoverHandlers
+{
+    NuberOfProcessedImages onImageHandle;
+    OnFinish onFinish;
+};
 
 class BgRemover
 {
 public:
-    virtual void start(BgRemoverSettingsPtr) = 0;
+    virtual void start(BgRemoverSettingsPtr, BgRemoverHandlers) = 0;
+    void stop();
 
-private:
-    static cv::Mat detectNextSeg(
-        cv::Mat const & src,
-        cv::Mat & bgmask,
-        std::shared_ptr<cv::BackgroundSubtractor> subsctructor);
-    void detectNextSeg(std::filesystem::path src, std::filesystem::path dst);
-//    static void myKmeans(std::string src, std::string dst);
+protected:
+    bool stopped_{ false };
 };
 
 }

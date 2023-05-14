@@ -61,20 +61,25 @@ static void refineSegments(const Mat& img, Mat& mask, Mat& dst)
     drawContours( dst, contours, largestComp, color, FILLED, LINE_8, hierarchy );
 }
 
-void Substruction::start(BgRemoverSettingsPtr settings)
+void Substruction::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
 {
+    auto countOfHandledImages{ 0 };
     auto subscriptionSettings = std::dynamic_pointer_cast<SubstructionSettings>(settings);
     Mat firstFrame = cv::imread(subscriptionSettings->bgImagePath().string(), cv::IMREAD_GRAYSCALE);
 
     for (auto path : std::filesystem::directory_iterator(subscriptionSettings->srcFolderPath()))
     {
+        if (stopped_)
+            break;
         cv::Mat tmpFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
         auto dstFrame = substruct(firstFrame, tmpFrame);
         auto dstPath = settings->dstFolderPath() / path.path().filename();
         cv::Mat invertedFrame;
-        cv::bitwise_not(dstFrame, invertedFrame);
-        imwrite(dstPath.string(), MaskEditor::removeNoise(invertedFrame));
+//        cv::bitwise_not(dstFrame, invertedFrame);
+        imwrite(dstPath.string(), MaskEditor::removeNoise(dstFrame));
+        handlers.onImageHandle(++countOfHandledImages);
     }
+    handlers.onFinish(std::error_code());
 }
 
 Mat Substruction::substruct(const cv::Mat &background, const cv::Mat &img)

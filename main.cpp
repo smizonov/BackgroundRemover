@@ -1,10 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+
 
 #include "src/model/Ohlander.h"
 #include "src/model/KMeans.h"
 #include "src/model/Bgsegm.h"
 #include "src/model/Substruction.h"
+#include "AlgoInterface.h"
 
 #include "src/model/SubstructionSettings.h"
 
@@ -28,15 +31,20 @@ int main(int argc, char *argv[])
     std::filesystem::path dstFolderPath{ "D:\\NIR_Remove_BG\\catResult" };
     std::filesystem::path srcBackgroundPath{ "D:\\NIR_Remove_BG\\cat\\20230508_151730.jpg" };
 //    backgroundRemover::Bgsegm::start(srcImage, dstImage);
-    auto settings = std::make_shared<SubstructionSettings>(srcFolderPath, dstFolderPath, srcBackgroundPath);
-    Substruction remover;
-    remover.start(settings);
+//    auto settings = std::make_shared<SubstructionSettings>(srcFolderPath, dstFolderPath, srcBackgroundPath);
+    auto settings = std::make_shared<BgRemoverSettings>(srcFolderPath, dstFolderPath);
+    Ohlander remover;
+//    KMeans remover;
+//    Substruction remover;
+//    remover.start(settings);
 //    backgroundRemover::Kmeans::performKmeans(srcImage, dstImage);
 //    backgroundRemover::Ohlander::start(srcImage, dstImage);
 //    backgroundRemover::Bgsegm::start("D:\\NIR_Remove_BG\\cat", "D:\\NIR_Remove_BG\\catResult");
 //    backgroundRemover::Substruction::start("D:\\NIR_Remove_BG\\cat", "D:\\NIR_Remove_BG\\catResult");
 //    backgroundRemover::Bgsegm::start("D:\\NIR_Remove_BG\\13", "D:\\NIR_Remove_BG\\catResult");
     QQmlApplicationEngine engine;
+    auto interface = new AlgoInterface(&app);
+    engine.rootContext()->setContextProperty("viewModel", interface);
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {

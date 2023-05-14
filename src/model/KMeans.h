@@ -6,18 +6,14 @@
 
 namespace backgroundRemover{
 
-class Kmeans : public BgRemover
+class KMeans : public BgRemover
 {
 public:
-//    Ohlander();
-
-    void start(BgRemoverSettingsPtr) override;
+    void start(BgRemoverSettingsPtr, BgRemoverHandlers) override;
 
 private:
     cv::Mat performKmeans(cv::Mat src);
 
-private:
-    BgRemoverSettingsPtr settings_;
 };
 
 }

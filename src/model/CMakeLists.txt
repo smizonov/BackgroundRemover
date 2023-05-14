@@ -3,12 +3,8 @@ cmake_minimum_required(VERSION 3.14)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-include(FetchContent)
-FetchContent_Declare(dlib
-    GIT_REPOSITORY https://github.com/davisking/dlib.git
-    GIT_TAG        v19.24
-)
-FetchContent_MakeAvailable(dlib)
+install(FILES OpenCV DESTINATION ${CMAKE_BINARY_DIR})
+#install(FILES ${OpenCV_INCLUDE_DIRS} DESTINATION ${CMAKE_BINARY_DIR})
 
 set(SOURCES
     Ohlander.cpp
@@ -31,7 +27,7 @@ add_library(model STATIC
 )
 
 target_include_directories(model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(model PRIVATE ${OpenCV_LIBS} Qt5::Core dlib::dlib)
+target_link_libraries(model PRIVATE ${OpenCV_LIBS} Qt5::Core)
 
 #add_library(model STATIC ${MY_MODULE_SOURCES})
 #target_include_directories(model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

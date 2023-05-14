@@ -13,7 +13,7 @@ namespace backgroundRemover{
 class Substruction : public BgRemover
 {
 public:
-    void start(BgRemoverSettingsPtr) override;
+    void start(BgRemoverSettingsPtr, BgRemoverHandlers) override;
 
 private:
     static cv::Mat substruct(
