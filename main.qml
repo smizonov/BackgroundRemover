@@ -9,27 +9,6 @@ import bgRemover 1.0
 
 //window containing the application
 ApplicationWindow {
-
-    function openFolderDialog(button) {
-        var dialog = Qt.createQmlObject(
-            'import QtQuick.Dialogs 1.3; FileDialog { folder: true }',
-            button
-        )
-
-        dialog.accepted.connect(function() {
-            button.folderPath = dialog.folder
-            console.log("Selected folder path:", button.folderPath)
-            dialog.destroy() // Clean up the dialog
-        })
-
-        dialog.rejected.connect(function() {
-            console.log("Folder selection canceled")
-            dialog.destroy() // Clean up the dialog
-        })
-
-        dialog.open()
-    }
-
     visible: true
 //    property var sortModeModel: []
 
@@ -53,7 +32,7 @@ ApplicationWindow {
             // Add your desired layout properties
 
             ComboBox {
-                width: 150
+                width: 200
                 textRole: "name"
                 model: ListModel {
                     id: varietiesMethods
@@ -68,28 +47,25 @@ ApplicationWindow {
                     }
 
                     ListElement {
-                        name: "Substruction algorithm"
-                        method: RmBgMethod.Substruction
+                        name: "Extruction algorithm"
+                        method: RmBgMethod.Extruction
                     }
                 }
 
                 onCurrentIndexChanged: {
-                    console.log(varietiesMethods.get(currentIndex).method)
-                    console.log(RmBgMethod.Substruction)
                     viewModel.method = varietiesMethods.get(currentIndex).method
                 }
             }
 
             Row {
                 Button {
-                    text: "Select src folder"
+                    text: "Select source folder"
                     onClicked: {
                         folderDialog.open()
-                        folderDialog.title = "Select src folder"
+                        folderDialog.title = "Select source folder"
                         folderDialog.dialogType = "srcFolderSelectionButton"
                     }
                 }
-
 
                 Label {
                     text: viewModel.srcFolder
@@ -98,22 +74,35 @@ ApplicationWindow {
 
 
 
-            Button {
-                text: "Select dst folder"
-                onClicked: {
-                    folderDialog.open()
-                    folderDialog.title = "Select dst folder"
-                    folderDialog.dialogType = "dstFolderSelectionButton"
+            Row {
+                Button {
+                    text: "Select destination folder"
+                    onClicked: {
+                        folderDialog.open()
+                        folderDialog.title = "Select destination folder"
+                        folderDialog.dialogType = "dstFolderSelectionButton"
+                    }
+                }
+
+                Label {
+                    text: viewModel.dstFolder
                 }
             }
 
-            Button {
-                text: "Select background image"
-                onClicked: {
-                    fileDialog.open()
-                    fileDialog.title = "Select background image"
+            Row {
+                Button {
+                    width: 350
+                    text: "Select background image (for extruction algorithm)"
+                    onClicked: {
+                        fileDialog.open()
+                        fileDialog.title = "Select background image"
+                    }
+                    enabled: viewModel.method === RmBgMethod.Extruction
                 }
-                enabled: viewModel.method === RmBgMethod.Substruction
+
+                Label {
+                    text: viewModel.bgImagePath
+                }
             }
 
             Button {
@@ -133,7 +122,7 @@ ApplicationWindow {
                 id: fileDialog
                 folder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
                 onAccepted: {
-                    var dstPath = folderDialog.folder.toString().slice(8)
+                    var dstPath = fileDialog.file.toString().slice(8)
                     viewModel.bgImagePath = dstPath
                 }
             }

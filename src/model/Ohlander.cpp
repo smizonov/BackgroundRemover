@@ -60,6 +60,7 @@ void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path ds
 
     Mat raw_image = imread(srcPath.string(), IMREAD_COLOR);
 
+    auto srcImage = raw_image;
     if(raw_image.empty()) {
         cerr << "Image format must be valid." << endl;
         exit(EXIT_FAILURE);
@@ -143,17 +144,10 @@ void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path ds
         }
     }
 
-    imwrite(dstPath.string(), MaskEditor::removeNoise(dest_image));
-    return;
-
-    auto dstMask{ paintResultImage(dest_image) };
-
-    Mat tmpImage;
-    bitwise_and(raw_image, raw_image, tmpImage, dstMask);
-    Mat dstImage = convertBlackToWhite(tmpImage);
+    MaskEditor::removeNoise(dest_image);
+    cv::Mat dstImage;
+    cv::bitwise_and(srcImage, srcImage, dstImage, dest_image);
     imwrite(dstPath.string(), dstImage);
-
-//    waitKey(0);
 }
 
 Mat paintResultImage(Mat const & src)

@@ -20,28 +20,6 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication app(argc, argv);
-
-//    std::string srcImage{ "D:\\NIR_Remove_BG\\Untitled.jpg" };
-    std::string srcImage{ "D:\\NIR_Remove_BG\\cat\\20230508_151733.jpg" };
-    std::string dstImage{ "D:\\NIR_Remove_BG\\results\\MayDst.jpg" };
-//    std::string srcFolderPath{ "D:\\NIR_Remove_BG\\cat" };
-//    std::string dstFolderPath{ "D:\\NIR_Remove_BG\\catResult" };
-//    std::string srcBackgroundPath{ "D:\\NIR_Remove_BG\\cat\\20230508_151730.jpg" };
-    std::filesystem::path srcFolderPath{ "D:\\NIR_Remove_BG\\cat" };
-    std::filesystem::path dstFolderPath{ "D:\\NIR_Remove_BG\\catResult" };
-    std::filesystem::path srcBackgroundPath{ "D:\\NIR_Remove_BG\\cat\\20230508_151730.jpg" };
-//    backgroundRemover::Bgsegm::start(srcImage, dstImage);
-//    auto settings = std::make_shared<SubstructionSettings>(srcFolderPath, dstFolderPath, srcBackgroundPath);
-    auto settings = std::make_shared<BgRemoverSettings>(srcFolderPath, dstFolderPath);
-    Ohlander remover;
-//    KMeans remover;
-//    Substruction remover;
-//    remover.start(settings);
-//    backgroundRemover::Kmeans::performKmeans(srcImage, dstImage);
-//    backgroundRemover::Ohlander::start(srcImage, dstImage);
-//    backgroundRemover::Bgsegm::start("D:\\NIR_Remove_BG\\cat", "D:\\NIR_Remove_BG\\catResult");
-//    backgroundRemover::Substruction::start("D:\\NIR_Remove_BG\\cat", "D:\\NIR_Remove_BG\\catResult");
-//    backgroundRemover::Bgsegm::start("D:\\NIR_Remove_BG\\13", "D:\\NIR_Remove_BG\\catResult");
     QQmlApplicationEngine engine;
     auto interface = new AlgoInterface(&app);
     engine.rootContext()->setContextProperty("viewModel", interface);

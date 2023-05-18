@@ -4,11 +4,8 @@
 #include "opencv2/highgui.hpp"
 #include "opencv2/video/background_segm.hpp"
 #include <stdio.h>
-//#include <opencv2/bgsegm.hpp>
 #include <string>
 
-
-#include "Bgsegm.h"
 #include "MaskEditor.h"
 
 using namespace std;
@@ -18,7 +15,7 @@ namespace backgroundRemover{
 
 cv::Mat tryRemoveSpot(cv::Mat image);
 
-cv::Mat MaskEditor::removeNoise(cv::Mat srcWhiteObjCV8)
+void MaskEditor::removeNoise(cv::Mat & srcWhiteObjCV8)
 {
     Mat temp1, temp2;
     auto kernelSize{ std::max(1,
@@ -33,10 +30,10 @@ cv::Mat MaskEditor::removeNoise(cv::Mat srcWhiteObjCV8)
 //    return tryRemoveSpot(temp1);
     dilate(temp1, temp2, kernel, Point(-1,-1));
     erode(temp2, temp1, kernel, Point(-1,-1));
-    dilate(temp1, temp2, kernel, Point(-1,-1));
+    dilate(temp1, srcWhiteObjCV8, kernel, Point(-1,-1));
 //    erode(temp2, temp1, kernel, Point(-1,-1));
 //    return temp2;
-    return temp2;
+//    return temp2;
 //return tryRemoveSpot(temp2);
 }
 

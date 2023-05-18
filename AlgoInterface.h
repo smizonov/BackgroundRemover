@@ -53,9 +53,7 @@ private:
     QString dstFolder_;
     QString bgImagePath_;
     float progress_{ 0.0 };
-    int countOfFiles_{ 0 };
     RmBgMethod method_;
-    std::unique_ptr<BgRemover> bgRemover_;
 };
 
 }

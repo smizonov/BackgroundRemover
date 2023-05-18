@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/types.hpp>
+#include <opencv2/imgproc.hpp>
 #include <vector>
 
 #include "KMeans.h"
@@ -127,11 +128,15 @@ void KMeans::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
     {
         if (stopped_)
             break;
-        cv::Mat tmpFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
-        auto preDst = performKmeans(std::move(tmpFrame));
-//        auto dst = MaskEditor::removeNoise(std::move(preDst));
+        cv::Mat colorFrame = cv::imread(path.path().string(), cv::IMREAD_COLOR);
+        cv::Mat grayFrame;
+        cv::cvtColor(colorFrame, grayFrame, /*COLOR_BGR2GRAY*/6);
+        auto mask = performKmeans(std::move(grayFrame));
+        MaskEditor::removeNoise(mask);
+        cv::Mat dstFrame;
+        cv::bitwise_and(colorFrame, colorFrame, dstFrame, mask);
         auto dstPath = settings->dstFolderPath() / path.path().filename();
-        cv::imwrite(dstPath.string(), preDst);
+        cv::imwrite(dstPath.string(), dstFrame);
         handlers.onImageHandle(++countOfHandledImages);
     }
     handlers.onFinish(std::error_code());

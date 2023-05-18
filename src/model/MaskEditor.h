@@ -10,8 +10,7 @@ namespace backgroundRemover{
 class MaskEditor
 {
 public:
-    static cv::Mat removeNoise(cv::Mat srcBlackObjCV8);
-
+    static void removeNoise(cv::Mat & srcBlackObjCV8);
 };
 
 }

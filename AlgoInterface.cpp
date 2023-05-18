@@ -3,15 +3,12 @@
 #include <QThreadPool>
 #include <functional>
 #include "src/model/SubstructionSettings.h"
+#include "src/model/MlRemover.h"
 
 #include "AlgoInterface.h"
 #include "BgRemoverTask.h"
 
 namespace backgroundRemover {
-
-namespace {
-
-}
 
 void initMetaTypes()
 {
@@ -42,8 +39,10 @@ std::unique_ptr<BgRemover> AlgoInterface::bgRemoverCreator()
         return std::make_unique<KMeans>();
     case RmBgMethod::Ohlander:
         return std::make_unique<Ohlander>();
-    case RmBgMethod::Substruction:
+    case RmBgMethod::Extruction:
         return std::make_unique<Substruction>();
+    case RmBgMethod::MlAlgo:
+        return std::make_unique<MlRemover>();
     }
     return nullptr;
 }
@@ -54,10 +53,11 @@ BgRemoverSettingsPtr AlgoInterface::bgRemoverSettingsCreator()
     {
     case RmBgMethod::KMeans:
     case RmBgMethod::Ohlander:
+    case RmBgMethod::MlAlgo:
         return std::make_shared<BgRemoverSettings>(std::filesystem::path(srcFolder_.toStdString()),
                                  std::filesystem::path(dstFolder_.toStdString()));
         break;
-    case RmBgMethod::Substruction:
+    case RmBgMethod::Extruction:
         return std::make_shared<SubstructionSettings>(std::filesystem::path(srcFolder_.toStdString()),
                                     std::filesystem::path(dstFolder_.toStdString()),
                                     std::filesystem::path(bgImagePath_.toStdString()));
@@ -72,10 +72,7 @@ void AlgoInterface::completed()
 
 void AlgoInterface::start()
 {
-    srcFolder_ = "D:\\NIR_Remove_BG\\cat";
-    dstFolder_ = "D:\\NIR_Remove_BG\\catResult";
-    bgImagePath_ = "D:\\NIR_Remove_BG\\cat\\20230508_151730.jpg";
-    method_ = RmBgMethod::Substruction;
+    method_ = RmBgMethod::MlAlgo;
     auto settings = bgRemoverSettingsCreator();
     auto remover = bgRemoverCreator();
     QDir dir(srcFolder_);
@@ -94,14 +91,13 @@ void AlgoInterface::start()
 
     connect(this, &AlgoInterface::stop, task, &BgRemoverTask::stop);
 
-//    QThreadPool::globalInstance()->setMaxThreadCount(3);
     QThreadPool::globalInstance()->start(task);
 }
 
 bool AlgoInterface::startEnabled()
 {
     return !srcFolder_.isEmpty() &&
-           !dstFolder_.isEmpty() && (RmBgMethod::Substruction != method_ || !bgImagePath_.isEmpty());
+           !dstFolder_.isEmpty() && (RmBgMethod::Extruction != method_ || !bgImagePath_.isEmpty());
 }
 
 

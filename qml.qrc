@@ -1,8 +1,5 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>AlgoWindow.qml</file>
-        <file>ButtonWithFolderSelection.qml</file>
-        <file>FileDialog.qml</file>
     </qresource>
 </RCC>

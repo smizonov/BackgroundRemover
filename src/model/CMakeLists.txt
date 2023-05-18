@@ -20,7 +20,9 @@ BgRemover.cpp
 BgRemoverSettings.h
 SubstructionSettings.h
 MaskEditor.cpp
-MaskEditor.h)
+MaskEditor.h
+MlRemover.h
+MlRemover.cpp)
 
 add_library(model STATIC
     ${SOURCES}

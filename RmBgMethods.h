@@ -13,7 +13,8 @@ Q_NAMESPACE
 {
     Ohlander,
     KMeans,
-    Substruction
+    Extruction,
+    MlAlgo
 };
 Q_ENUM_NS(RmBgMethod)
 }

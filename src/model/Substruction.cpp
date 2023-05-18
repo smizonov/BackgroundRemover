@@ -71,12 +71,17 @@ void Substruction::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handle
     {
         if (stopped_)
             break;
-        cv::Mat tmpFrame = cv::imread(path.path().string(), cv::IMREAD_GRAYSCALE);
-        auto dstFrame = substruct(firstFrame, tmpFrame);
+        cv::Mat colorFrame = cv::imread(path.path().string(), cv::IMREAD_COLOR);
+        cv::Mat grayFrame;
+        cv::cvtColor(colorFrame, grayFrame, COLOR_BGR2GRAY);
+        auto mask = substruct(firstFrame, grayFrame);
         auto dstPath = settings->dstFolderPath() / path.path().filename();
-        cv::Mat invertedFrame;
-//        cv::bitwise_not(dstFrame, invertedFrame);
-        imwrite(dstPath.string(), MaskEditor::removeNoise(dstFrame));
+        cv::Mat dstFrame;
+        MaskEditor::removeNoise(mask);
+//        imwrite(dstPath.string(), mask);
+//        continue;
+        cv::bitwise_and(colorFrame, colorFrame, dstFrame, mask);
+        imwrite(dstPath.string(), dstFrame);
         handlers.onImageHandle(++countOfHandledImages);
     }
     handlers.onFinish(std::error_code());
