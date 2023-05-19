@@ -11,6 +11,34 @@
 namespace backgroundRemover{
 
 
+cv::Mat readCSV(const std::string& filename, int rows, int cols)
+{
+    cv::Mat mat(rows, cols, CV_32FC3); // Create a floating-point BGR image matrix
+
+    std::ifstream file(filename);
+    std::string line;
+    int row = 0;
+
+    while (std::getline(file, line))
+    {
+        std::stringstream ss(line);
+        std::string cell;
+        int col = 0;
+
+        while (std::getline(ss, cell, ','))
+        {
+            float pixelValue = std::stof(cell);
+            mat.at<cv::Vec3f>(row, col)[0] = pixelValue;
+
+            col++;
+        }
+
+        row++;
+    }
+
+    return mat;
+}
+
 //void normalizeImage(cv::Mat& image) {
 //    cv::Scalar mean(0.485, 0.456, 0.406);
 //    cv::Scalar stdDev(0.229, 0.224, 0.225);
@@ -117,7 +145,7 @@ cv::Mat processPredictions(cv::Mat& ort_outs, const cv::Mat& inputImage)
 
     cv::Mat normalizedPred = pred;// (pred - mi) / (ma - mi);
 
-    cv::imshow((cv::Mat(320, 320, CV_32FC1, normalizedPred));
+//    cv::imshow((cv::Mat(320, 320, CV_32FC1, normalizedPred));
     cv::waitKey(0);
     cv::Mat mask;
     normalizedPred.convertTo(mask, CV_8UC1, 255.0);
@@ -156,8 +184,9 @@ void MlRemover::start(BgRemoverSettingsPtr, BgRemoverHandlers)
     cv::Mat image = cv::imread("D:\\NIR_Remove_BG\\photo_2.jpg");
     cv::Mat blob;
 //    normalizeImage(image);
-    cv::Mat normalizedImage = normalizeImage(image);
-    cv::dnn::blobFromImage(normalizedImage, blob, 1, cv::Size(320, 320), cv::Scalar(0));
+//    cv::Mat normalizedImage = normalizeImage(image);
+    cv::Mat normalizedImage = readCSV("D:\\qt\\mlArrayResult\\pythonSrc.csv", 320, 320);
+    cv::dnn::blobFromImage(normalizedImage, blob, 1, cv::Size(320, 320), cv::Scalar(0, 0, 0));
 
     std::ofstream outputFile("D:\\qt\\mlArrayResult\\cppSrc.txt");
 

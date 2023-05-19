@@ -22,7 +22,9 @@ SubstructionSettings.h
 MaskEditor.cpp
 MaskEditor.h
 MlRemover.h
-MlRemover.cpp)
+MlRemover.cpp
+ModelWorker.h
+ModelWorker.cpp)
 
 add_library(model STATIC
     ${SOURCES}
