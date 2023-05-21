@@ -14,7 +14,7 @@ Q_NAMESPACE
     Ohlander,
     KMeans,
     Extruction,
-    MlAlgo
+    MLU2net
 };
 Q_ENUM_NS(RmBgMethod)
 }

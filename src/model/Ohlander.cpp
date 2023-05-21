@@ -36,21 +36,7 @@ Mat paintResultImage(Mat const & src);
 void calculate_midpoint(Mat hist, int&, int&);
 Mat convertBlackToWhite(Mat const & src);
 
-void Ohlander::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
-{
-    auto countOfHandledImages{ 0 };
-    for (auto path : std::filesystem::directory_iterator(settings->srcFolderPath()))
-    {
-        if (stopped_)
-            break;
-        auto dstPath = settings->dstFolderPath() / path.path().filename();
-        startImpl(path, dstPath);
-        handlers.onImageHandle(++countOfHandledImages);
-    }
-    handlers.onFinish(std::error_code());
-}
-
-void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path dstPath)
+Mat Ohlander::getObjectMask(const cv::Mat &raw_image)
 {
     vector<Mat> result_masks;
     vector<Mat> mask_stack;
@@ -58,9 +44,6 @@ void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path ds
     vector<Mat> channels(3);
     vector<Mat> channels_hist(3);
 
-    Mat raw_image = imread(srcPath.string(), IMREAD_COLOR);
-
-    auto srcImage = raw_image;
     if(raw_image.empty()) {
         cerr << "Image format must be valid." << endl;
         exit(EXIT_FAILURE);
@@ -88,7 +71,7 @@ void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path ds
     std::map<int, int> occupiedPixelsToResultVectorIndex;
     auto index{ 0u };
 
-//    std::vector<std::pair<int, int>> occupiedPixelsToResultVectorIndex;
+    //    std::vector<std::pair<int, int>> occupiedPixelsToResultVectorIndex;
     for (auto const & region : result_vector)
     {
         auto center = extractCenterSquare(region, 20);
@@ -119,17 +102,17 @@ void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path ds
         throw std::runtime_error("occupiedPixelsToResultVectorIndex empty!");
 
 
-//    RNG rng(12345);
-//    for(int i=0; i<result_vector.size(); i++) {
-//        Vec3b color = Vec3b(rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255));
-//        for(int x=0; x<raw_image.rows; x++) {
-//            for(int y=0; y<raw_image.cols; y++) {
-//                if(result_vector.at(i).at<uchar>(x,y) != 0) {
-//                    dest_image.at<Vec3b>(x,y) = color;
-//                }
-//            }
-//        }
-//    }
+    //    RNG rng(12345);
+    //    for(int i=0; i<result_vector.size(); i++) {
+    //        Vec3b color = Vec3b(rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255));
+    //        for(int x=0; x<raw_image.rows; x++) {
+    //            for(int y=0; y<raw_image.cols; y++) {
+    //                if(result_vector.at(i).at<uchar>(x,y) != 0) {
+    //                    dest_image.at<Vec3b>(x,y) = color;
+    //                }
+    //            }
+    //        }
+    //    }
 
     for(int x=0; x<raw_image.rows; x++) {
         for(int y=0; y<raw_image.cols; y++) {
@@ -144,10 +127,7 @@ void Ohlander::startImpl(std::filesystem::path srcPath, std::filesystem::path ds
         }
     }
 
-    MaskEditor::removeNoise(dest_image);
-    cv::Mat dstImage;
-    cv::bitwise_and(srcImage, srcImage, dstImage, dest_image);
-    imwrite(dstPath.string(), dstImage);
+    return dest_image;
 }
 
 Mat paintResultImage(Mat const & src)
@@ -305,6 +285,11 @@ void generate_mask(Mat hist, int valley, int index, vector<Mat> & mask_stack, st
 
     mask_stack.push_back(right_mask);
     mask_stack.push_back(left_mask);
+}
+
+void Ohlander::postProcessingMask(cv::Mat &mask)
+{
+    MaskEditor::removeNoise(mask);
 }
 
 }

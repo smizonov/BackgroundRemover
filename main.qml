@@ -36,6 +36,12 @@ ApplicationWindow {
                 textRole: "name"
                 model: ListModel {
                     id: varietiesMethods
+
+                    ListElement {
+                        name: "ML u2net"
+                        method: RmBgMethod.MLU2net
+                    }
+
                     ListElement {
                         name: "Ohlander algorithm"
                         method: RmBgMethod.Ohlander
@@ -47,7 +53,7 @@ ApplicationWindow {
                     }
 
                     ListElement {
-                        name: "Extruction algorithm"
+                        name: "Subtruction algorithm"
                         method: RmBgMethod.Extruction
                     }
                 }

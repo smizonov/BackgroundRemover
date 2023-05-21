@@ -12,15 +12,13 @@ namespace backgroundRemover{
 
 class Substruction : public BgRemover
 {
-public:
-    void start(BgRemoverSettingsPtr, BgRemoverHandlers) override;
+protected:
+    void onStartPreparation(BgRemoverSettingsPtr) override;
+    cv::Mat getObjectMask(cv::Mat const & image) override;
+    void postProcessingMask(cv::Mat & image) override;
 
 private:
-    static cv::Mat substruct(
-        cv::Mat const & background,
-        cv::Mat const & img);
-    void detectNextSeg(std::filesystem::path src, std::filesystem::path dst);
-//    static void myKmeans(std::string src, std::string dst);
+    cv::Mat backgroudImage_;
 };
 
 }

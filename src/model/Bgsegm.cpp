@@ -15,15 +15,6 @@ using namespace cv;
 
 namespace backgroundRemover{
 
-static void help(char** argv)
-{
-    printf("\n"
-           "This program demonstrated a simple method of connected components clean up of background subtraction\n"
-           "When the program starts, it begins learning the background.\n"
-           "You can toggle background learning on and off by hitting the space bar.\n"
-           "Call\n"
-           "%s [video file, else it reads camera 0]\n\n", argv[0]);
-}
 
 static void refineSegments(const Mat& img, Mat& mask, Mat& dst)
 {

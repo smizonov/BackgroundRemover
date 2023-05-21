@@ -22,8 +22,13 @@ struct BgRemoverHandlers
 class BgRemover
 {
 public:
-    virtual void start(BgRemoverSettingsPtr, BgRemoverHandlers) = 0;
+    void start(BgRemoverSettingsPtr, BgRemoverHandlers);
     void stop();
+
+protected:
+    virtual void onStartPreparation(BgRemoverSettingsPtr) = 0;
+    virtual cv::Mat getObjectMask(cv::Mat const & image) = 0;
+    virtual void postProcessingMask(cv::Mat & image) = 0;
 
 protected:
     bool stopped_{ false };

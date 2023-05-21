@@ -121,25 +121,11 @@ void dbscan(const std::vector<std::vector<double>>& feature_points, double eps, 
 //    return 0;
 //}
 
-void KMeans::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
+cv::Mat KMeans::getObjectMask(const cv::Mat &colorIm)
 {
-    auto countOfHandledImages{ 0 };
-    for (auto path : std::filesystem::directory_iterator(settings->srcFolderPath()))
-    {
-        if (stopped_)
-            break;
-        cv::Mat colorFrame = cv::imread(path.path().string(), cv::IMREAD_COLOR);
-        cv::Mat grayFrame;
-        cv::cvtColor(colorFrame, grayFrame, /*COLOR_BGR2GRAY*/6);
-        auto mask = performKmeans(std::move(grayFrame));
-        MaskEditor::removeNoise(mask);
-        cv::Mat dstFrame;
-        cv::bitwise_and(colorFrame, colorFrame, dstFrame, mask);
-        auto dstPath = settings->dstFolderPath() / path.path().filename();
-        cv::imwrite(dstPath.string(), dstFrame);
-        handlers.onImageHandle(++countOfHandledImages);
-    }
-    handlers.onFinish(std::error_code());
+    cv::Mat grayIm;
+    cv::cvtColor(colorIm, grayIm, /*COLOR_BGR2GRAY*/6);
+    return performKmeans(std::move(grayIm));
 }
 
 cv::Mat KMeans::performKmeans(cv::Mat src)
@@ -166,17 +152,11 @@ cv::Mat KMeans::performKmeans(cv::Mat src)
     clusteredImage.convertTo(clusteredImage, CV_8U, 255.0 / (clusterCount - 1));
 
     return clusteredImage;
-    // Display the original and clustered images
-//    cv::imshow("Original Image", image);
-
-
-////    cv.erode(src, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-//    cv::imshow("Clustered Image", clusteredImage);
-//    cv::imwrite(dst, clusteredImage);
-//    cv::waitKey(0);
-
 }
 
+void KMeans::postProcessingMask(cv::Mat &mask)
+{
+    MaskEditor::removeNoise(mask);
+}
 
 }

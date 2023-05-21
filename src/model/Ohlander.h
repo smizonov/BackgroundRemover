@@ -10,12 +10,12 @@ namespace backgroundRemover{
 
 class Ohlander : public BgRemover
 {
-public:
-    void start(BgRemoverSettingsPtr, BgRemoverHandlers) override;
+protected:
+    void onStartPreparation(BgRemoverSettingsPtr) override {}
+    cv::Mat getObjectMask(cv::Mat const & image) override;
+    void postProcessingMask(cv::Mat & image) override;
 
 private:
-    void startImpl(std::filesystem::path srcPath, std::filesystem::path dstPath);
-    void prepareImage();
     void OhlanderFunc(
         std::vector<cv::Mat> & result_masks,
         std::vector<cv::Mat> & mask_stack,

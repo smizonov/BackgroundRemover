@@ -41,7 +41,7 @@ std::unique_ptr<BgRemover> AlgoInterface::bgRemoverCreator()
         return std::make_unique<Ohlander>();
     case RmBgMethod::Extruction:
         return std::make_unique<Substruction>();
-    case RmBgMethod::MlAlgo:
+    case RmBgMethod::MLU2net:
         return std::make_unique<MlRemover>();
     }
     return nullptr;
@@ -53,7 +53,7 @@ BgRemoverSettingsPtr AlgoInterface::bgRemoverSettingsCreator()
     {
     case RmBgMethod::KMeans:
     case RmBgMethod::Ohlander:
-    case RmBgMethod::MlAlgo:
+    case RmBgMethod::MLU2net:
         return std::make_shared<BgRemoverSettings>(std::filesystem::path(srcFolder_.toStdString()),
                                  std::filesystem::path(dstFolder_.toStdString()));
         break;
@@ -72,7 +72,6 @@ void AlgoInterface::completed()
 
 void AlgoInterface::start()
 {
-    method_ = RmBgMethod::MlAlgo;
     auto settings = bgRemoverSettingsCreator();
     auto remover = bgRemoverCreator();
     QDir dir(srcFolder_);
