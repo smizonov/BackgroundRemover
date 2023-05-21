@@ -29,7 +29,6 @@ Mat Substruction::getObjectMask(const cv::Mat &image)
     cv::Mat grayFrame;
     cv::cvtColor(image, grayFrame, COLOR_BGR2GRAY);
     cv::Mat dst;
-    std::cout << "grayFrame size = " << grayFrame.size << " backgroudImage_ size = " << backgroudImage_.size << std::endl;
     cv::subtract(backgroudImage_, grayFrame, dst);
     return dst;
 }
