@@ -23,6 +23,10 @@ MaskEditor.cpp
 MaskEditor.h
 MlRemover.h
 MlRemover.cpp
+DisModelWorker.h
+DisModelWorker.cpp
+U2ModelWorker.h
+U2ModelWorker.cpp
 ModelWorker.h
 ModelWorker.cpp)
 

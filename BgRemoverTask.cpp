@@ -18,7 +18,14 @@ BgRemoverTask::BgRemoverTask(
 
 void BgRemoverTask::run()
 {
-    remover_->start(settings_, bgRemoverHandlersCreator());
+    try
+    {
+        remover_->start(settings_, bgRemoverHandlersCreator());
+    }
+    catch(std::exception & ec)
+    {
+        std::cout << "BgRemoverTask::run: exception = " << ec.what() << std::endl;
+    }
 }
 
 void BgRemoverTask::stop()

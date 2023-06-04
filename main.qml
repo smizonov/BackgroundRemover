@@ -43,6 +43,11 @@ ApplicationWindow {
                     }
 
                     ListElement {
+                        name: "ML dis"
+                        method: RmBgMethod.MLDis
+                    }
+
+                    ListElement {
                         name: "Ohlander algorithm"
                         method: RmBgMethod.Ohlander
                     }

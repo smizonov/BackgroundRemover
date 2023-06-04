@@ -7,13 +7,12 @@ namespace backgroundRemover {
 
 class ModelWorker
 {
-private:
+protected:
     ModelWorker(std::filesystem::path);
 
 public:
-    static ModelWorker& getInstance();
-
-    cv::dnn::Net & operator()();
+    virtual cv::Size inputImageSize() = 0;
+    cv::dnn::Net & net();
 
 public:
     std::string const & outputLayerName();
@@ -23,4 +22,5 @@ private:
     std::vector<std::string> const layerNames_;
 };
 
+using ModelWorkerUniquePtr = std::unique_ptr<ModelWorker>;
 }

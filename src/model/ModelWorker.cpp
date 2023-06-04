@@ -1,7 +1,6 @@
-#include "ModelWorker.h"
+#include "U2ModelWorker.h"
 
 #include <iostream>
-
 
 namespace backgroundRemover {
 
@@ -10,14 +9,7 @@ ModelWorker::ModelWorker(std::filesystem::path path)
     , layerNames_(net_.getUnconnectedOutLayersNames())
 {}
 
-ModelWorker & ModelWorker::getInstance()
-{
-    std::filesystem::path currentPath = std::filesystem::current_path()/ "model" / "u2net.onnx";
-    static ModelWorker model(currentPath);
-    return model;
-}
-
-cv::dnn::Net &ModelWorker::operator()()
+cv::dnn::Net & ModelWorker::net()
 {
     return net_;
 }
