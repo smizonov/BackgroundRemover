@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt5 COMPONENTS Core Quick REQUIRED)
-find_package(Qt5 COMPONENTS Core Quick REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Widgets REQUIRED)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -33,7 +33,7 @@ add_executable(BackgroundRemover
 target_compile_definitions(BackgroundRemover
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(BackgroundRemover
-  PRIVATE Qt5::Core Qt5::Quick)
+  PRIVATE Qt5::Core Qt5::Quick Qt5::Widgets)
 
 set_target_properties(BackgroundRemover PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

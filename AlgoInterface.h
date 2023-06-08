@@ -36,9 +36,12 @@ signals:
     void methodChanged();
     void startEnabledChanged();
     void stop();
+    void priviewRequested(QString srcPath, QString dstPath);
 
 public:
     Q_INVOKABLE void start();
+    Q_INVOKABLE QString showDirectoryDialog(const QString &directory, const QString &caption) const;
+    Q_INVOKABLE QString showOpenDialog(const QString &directory, const QString &caption) const;
 
     bool startEnabled();
     BgRemoverHandlers bgRemoverHandlersCreator();

@@ -72,9 +72,9 @@ ApplicationWindow {
                 Button {
                     text: "Select source folder"
                     onClicked: {
-                        folderDialog.open()
-                        folderDialog.title = "Select source folder"
-                        folderDialog.dialogType = "srcFolderSelectionButton"
+                        viewModel.srcFolder = viewModel.showDirectoryDialog(
+                                    StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
+                                    "Select source folder")
                     }
                 }
 
@@ -83,15 +83,13 @@ ApplicationWindow {
                 }
             }
 
-
-
             Row {
                 Button {
                     text: "Select destination folder"
                     onClicked: {
-                        folderDialog.open()
-                        folderDialog.title = "Select destination folder"
-                        folderDialog.dialogType = "dstFolderSelectionButton"
+                        viewModel.dstFolder = viewModel.showDirectoryDialog(
+                                    StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
+                                    "Select destination folder")
                     }
                 }
 
@@ -105,8 +103,9 @@ ApplicationWindow {
                     width: 350
                     text: "Select background image (for extruction algorithm)"
                     onClicked: {
-                        fileDialog.open()
-                        fileDialog.title = "Select background image"
+                        viewModel.bgImagePath = viewModel.showOpenDialog(
+                                    StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
+                                    "Select background image")
                     }
                     enabled: viewModel.method === RmBgMethod.Extruction
                 }
@@ -126,31 +125,6 @@ ApplicationWindow {
                 text: "Stop"
                 onClicked: {
                     viewModel.stop()
-                }
-            }
-
-            FileDialog {
-                id: fileDialog
-                folder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
-                onAccepted: {
-                    var dstPath = fileDialog.file.toString().slice(8)
-                    viewModel.bgImagePath = dstPath
-                }
-            }
-
-            FolderDialog {
-                id: folderDialog
-                folder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
-                visible: false
-
-                property string dialogType: "" // Custom property to store the button type
-
-                onAccepted: {
-                    var dstFolder = folderDialog.folder.toString().slice(8)
-                    if (folderDialog.dialogType === "srcFolderSelectionButton")
-                        viewModel.srcFolder = dstFolder
-                    else if (folderDialog.dialogType === "dstFolderSelectionButton")
-                        viewModel.dstFolder = dstFolder
                 }
             }
         }

@@ -21,6 +21,7 @@ class BgRemoverTask :  public QObject, public QRunnable
 
 signals:
     void taskCompleted();
+    void previewRequested(QString srcPath, QString dstPath);
     void progressChanged(float count);
 
 public:

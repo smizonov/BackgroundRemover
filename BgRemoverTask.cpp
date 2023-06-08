@@ -45,6 +45,12 @@ BgRemoverHandlers BgRemoverTask::bgRemoverHandlersCreator()
     {
         emit taskCompleted();
     };
+    handlers.firstResult = [this](std::filesystem::path srcIm, std::filesystem::path dstIm)
+    {
+        QString src = QString::fromStdString("file:///" + srcIm.generic_string());
+        QString dst = QString::fromStdString("file:///" + dstIm.generic_string());
+        emit previewRequested(src, dst);
+    };
     return handlers;
 }
 

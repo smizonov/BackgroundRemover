@@ -12,11 +12,13 @@ namespace backgroundRemover{
 using BgRemoverSettingsPtr = std::shared_ptr<BgRemoverSettings>;
 using OnFinish = std::function<void(std::error_code)>;
 using NuberOfProcessedImages = std::function<void(int count)>;
+using FirstResultImagePath = std::function<void(std::filesystem::path src, std::filesystem::path dst)>;
 
 struct BgRemoverHandlers
 {
     NuberOfProcessedImages onImageHandle;
     OnFinish onFinish;
+    FirstResultImagePath firstResult;
 };
 
 class BgRemover

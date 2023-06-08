@@ -1,6 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QThreadPool>
+#include <QFileDialog>
+#include <QWindow>
+
 #include <functional>
 #include "src/model/SubstructionSettings.h"
 #include "src/model/MlRemover.h"
@@ -85,15 +88,19 @@ void AlgoInterface::start()
     auto task = new BgRemoverTask(std::move(remover), std::move(settings), dir.count());
     task->setAutoDelete(true);
     connect(task, &BgRemoverTask::taskCompleted, [this]()
-                     {
+            {
                 completed();
-                         qInfo() << "Task completed";
-                     });
+                qInfo() << "Task completed";
+            });
     connect(task, &BgRemoverTask::progressChanged, [this](float progress)
-                     {
-                         progress_ = progress;
-                         emit progressChanged();
-                     });
+            {
+                progress_ = progress;
+                emit progressChanged();
+            });
+    connect(task, &BgRemoverTask::previewRequested, [this](QString srcPath, QString dstPath)
+            {
+                emit priviewRequested(srcPath, dstPath);
+            });
 
     connect(this, &AlgoInterface::stop, task, &BgRemoverTask::stop);
 
@@ -106,8 +113,35 @@ bool AlgoInterface::startEnabled()
            !dstFolder_.isEmpty() && (RmBgMethod::Extruction != method_ || !bgImagePath_.isEmpty());
 }
 
+QString AlgoInterface::showDirectoryDialog(const QString &directory, const QString &caption) const
+{
+    QPointer<QWindow> focusedWindow(QGuiApplication::focusWindow());
 
+    auto result = QFileDialog::getExistingDirectory(
+        nullptr,
+        caption.isEmpty() ? QCoreApplication::applicationName() : caption,
+        directory,
+        QFileDialog::ShowDirsOnly);
 
+    if (!focusedWindow.isNull())
+        focusedWindow->requestActivate();
 
+    return result;
+}
+
+QString AlgoInterface::showOpenDialog(const QString &directory, const QString &caption) const
+{
+    QPointer<QWindow> focusedWindow(QGuiApplication::focusWindow());
+
+    auto filename = QFileDialog::getOpenFileName(
+        nullptr,
+        caption.isEmpty() ? QCoreApplication::applicationName() : caption,
+        directory);
+
+    if (!focusedWindow.isNull())
+        focusedWindow->requestActivate();
+
+    return filename;
+}
 
 }

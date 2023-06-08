@@ -33,6 +33,9 @@ void BgRemover::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
         cv::Mat dstImage;
         cv::bitwise_and(srcImage, srcImage, dstImage, mask);
         imwrite(dstPath.string(), dstImage);
+        if (0 == countOfHandledImages)
+            handlers.firstResult(path, dstPath);
+
         handlers.onImageHandle(++countOfHandledImages);
     }
     handlers.onFinish(std::error_code());
