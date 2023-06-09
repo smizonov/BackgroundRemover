@@ -128,6 +128,11 @@ ApplicationWindow {
                 }
             }
         }
+        Row {
+            Image {
+
+            }
+        }
     }
 
     ProgressBar {
