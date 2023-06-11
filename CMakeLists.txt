@@ -22,6 +22,12 @@ set(PROJECT_SOURCES
         RmBgMethods.h
         BgRemoverTask.cpp
         BgRemoverTask.h
+        Utils.h
+        Utils.cpp
+        PreviewImages.h
+        PreviewImages.cpp
+        MetaTypeRegistrator.h
+        MetaTypeRegistrator.cpp
 )
 
 add_subdirectory(src/model)

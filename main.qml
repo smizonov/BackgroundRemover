@@ -4,8 +4,9 @@ import QtQuick.Controls 2.15
 import QtQml.Models 2.15
 import QtQuick.Controls 1.4
 import QtQuick 2.0
-import Qt.labs.platform 1.1
+//import Qt.labs.platform 1.1
 import bgRemover 1.0
+import utils 1.0
 
 //window containing the application
 ApplicationWindow {
@@ -18,6 +19,41 @@ ApplicationWindow {
     title: qsTr("Background remover")
     width: 640
     height: 480
+
+    menuBar: MenuBar {
+        Menu {
+            title: "File"
+            MenuItem {
+                text: "Close"
+                onTriggered: Qt.callLater(Qt.quit)
+            }
+        }
+
+        Menu {
+            title: "Edit"
+            MenuItem {
+                text: "Select source folder"
+                onTriggered: {
+                    viewModel.srcFolder = Utils.showDirectoryDialog(
+                                StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
+                                "Select source folder")
+                }
+
+            }
+            MenuItem {
+                text: "Select destination folder"
+                onTriggered: {
+                    viewModel.dstFolder = Utils.showDirectoryDialog(
+                                StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
+                                "Select destination folder")
+                }
+            }
+            MenuItem {
+                text: "Select background image"
+                enabled: viewModel.method === RmBgMethod.Extruction
+            }
+        }
+    }
 
     MouseArea {
         anchors.fill: parent
@@ -72,7 +108,7 @@ ApplicationWindow {
                 Button {
                     text: "Select source folder"
                     onClicked: {
-                        viewModel.srcFolder = viewModel.showDirectoryDialog(
+                        viewModel.srcFolder = Utils.showDirectoryDialog(
                                     StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
                                     "Select source folder")
                     }
@@ -87,7 +123,7 @@ ApplicationWindow {
                 Button {
                     text: "Select destination folder"
                     onClicked: {
-                        viewModel.dstFolder = viewModel.showDirectoryDialog(
+                        viewModel.dstFolder = Utils.showDirectoryDialog(
                                     StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
                                     "Select destination folder")
                     }
@@ -103,7 +139,7 @@ ApplicationWindow {
                     width: 350
                     text: "Select background image (for extruction algorithm)"
                     onClicked: {
-                        viewModel.bgImagePath = viewModel.showOpenDialog(
+                        viewModel.bgImagePath = Utils.showOpenDialog(
                                     StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
                                     "Select background image")
                     }
@@ -122,21 +158,23 @@ ApplicationWindow {
                 }
             }
             Button {
+                id: stopBotton
                 text: "Stop"
                 onClicked: {
                     viewModel.stop()
                 }
             }
         }
-        Row {
-            Image {
-
-            }
-        }
     }
 
     ProgressBar {
+        id: progressBar
         anchors.bottom: parent.bottom
         value: viewModel.progress
+    }
+
+    PreviewImages {
+//        visible: false
+        anchors.top: stopBotton.anchors.bottom
     }
 }

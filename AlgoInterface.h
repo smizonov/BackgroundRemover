@@ -10,6 +10,7 @@
 #include "src/model/Bgsegm.h"
 #include "src/model/Substruction.h"
 #include "RmBgMethods.h"
+#include "PreviewImages.h"
 
 namespace backgroundRemover {
 
@@ -24,6 +25,7 @@ class AlgoInterface : public QObject
     Q_PROPERTY(float progress MEMBER progress_ NOTIFY progressChanged);
     Q_PROPERTY(backgroundRemover::RmBgMethodsNamespace::RmBgMethod method MEMBER method_ NOTIFY methodChanged);
     Q_PROPERTY(bool startEnabled READ startEnabled NOTIFY startEnabledChanged);
+    Q_PROPERTY(PreviewImages* previewImages READ previewImages CONSTANT);
 
 public:
     AlgoInterface(QObject* obj);
@@ -36,14 +38,12 @@ signals:
     void methodChanged();
     void startEnabledChanged();
     void stop();
-    void priviewRequested(QString srcPath, QString dstPath);
 
 public:
     Q_INVOKABLE void start();
-    Q_INVOKABLE QString showDirectoryDialog(const QString &directory, const QString &caption) const;
-    Q_INVOKABLE QString showOpenDialog(const QString &directory, const QString &caption) const;
 
     bool startEnabled();
+    PreviewImages * previewImages();
     BgRemoverHandlers bgRemoverHandlersCreator();
 
 private:
@@ -57,6 +57,7 @@ private:
     QString bgImagePath_;
     float progress_{ 0.0 };
     RmBgMethod method_;
+    std::unique_ptr<PreviewImages> previewImages_;
 };
 
 }

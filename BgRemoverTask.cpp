@@ -31,6 +31,12 @@ void BgRemoverTask::run()
 void BgRemoverTask::stop()
 {
     remover_->stop();
+    resume();
+}
+
+void BgRemoverTask::resume()
+{
+    remover_->resume();
 }
 
 BgRemoverHandlers BgRemoverTask::bgRemoverHandlersCreator()
@@ -45,10 +51,10 @@ BgRemoverHandlers BgRemoverTask::bgRemoverHandlersCreator()
     {
         emit taskCompleted();
     };
-    handlers.firstResult = [this](std::filesystem::path srcIm, std::filesystem::path dstIm)
+    handlers.previewImagePathsReceived = [this](std::filesystem::path srcIm, std::filesystem::path dstIm)
     {
-        QString src = QString::fromStdString("file:///" + srcIm.generic_string());
-        QString dst = QString::fromStdString("file:///" + dstIm.generic_string());
+        QUrl src = QUrl::fromLocalFile(QString::fromStdString(srcIm.generic_string()));
+        QUrl dst = QUrl::fromLocalFile(QString::fromStdString(dstIm.generic_string()));
         emit previewRequested(src, dst);
     };
     return handlers;

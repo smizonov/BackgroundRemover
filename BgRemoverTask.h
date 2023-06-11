@@ -13,6 +13,8 @@
 #include "RmBgMethods.h"
 #include "AlgoInterface.h"
 
+#include <QUrl>
+
 namespace backgroundRemover {
 
 class BgRemoverTask :  public QObject, public QRunnable
@@ -21,7 +23,7 @@ class BgRemoverTask :  public QObject, public QRunnable
 
 signals:
     void taskCompleted();
-    void previewRequested(QString srcPath, QString dstPath);
+    void previewRequested(QUrl srcPath, QUrl dstPath);
     void progressChanged(float count);
 
 public:
@@ -35,6 +37,7 @@ public:
 
 public slots:
     void stop();
+    void resume();
 
 private:
     BgRemoverHandlers bgRemoverHandlersCreator();

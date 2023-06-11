@@ -15,21 +15,10 @@
 
 namespace backgroundRemover {
 
-void initMetaTypes()
-{
-    qmlRegisterUncreatableMetaObject(
-        RmBgMethodsNamespace::staticMetaObject,
-        "bgRemover",
-        1,
-        0,
-        "RmBgMethod",
-        "Can't create RmBgMethod");
-}
-
 AlgoInterface::AlgoInterface(QObject *obj)
     : QObject(obj)
+    , previewImages_(std::make_unique<PreviewImages>())
 {
-    initMetaTypes();
     connect(this, &AlgoInterface::srcFolderChanged, this, &AlgoInterface::startEnabledChanged);
     connect(this, &AlgoInterface::dstFolderChanged, this, &AlgoInterface::startEnabledChanged);
     connect(this, &AlgoInterface::methodChanged, this, &AlgoInterface::startEnabledChanged);
@@ -97,10 +86,10 @@ void AlgoInterface::start()
                 progress_ = progress;
                 emit progressChanged();
             });
-    connect(task, &BgRemoverTask::previewRequested, [this](QString srcPath, QString dstPath)
-            {
-                emit priviewRequested(srcPath, dstPath);
-            });
+    connect(task, &BgRemoverTask::previewRequested, previewImages_.get(), &PreviewImages::updatePath);
+
+    connect(previewImages_.get(), &PreviewImages::continueSelected, task, &BgRemoverTask::resume);
+    connect(previewImages_.get(), &PreviewImages::stopSelected, task, &BgRemoverTask::stop);
 
     connect(this, &AlgoInterface::stop, task, &BgRemoverTask::stop);
 
@@ -110,38 +99,13 @@ void AlgoInterface::start()
 bool AlgoInterface::startEnabled()
 {
     return !srcFolder_.isEmpty() &&
-           !dstFolder_.isEmpty() && (RmBgMethod::Extruction != method_ || !bgImagePath_.isEmpty());
+            !dstFolder_.isEmpty() && (RmBgMethod::Extruction != method_ || !bgImagePath_.isEmpty());
 }
 
-QString AlgoInterface::showDirectoryDialog(const QString &directory, const QString &caption) const
+PreviewImages *AlgoInterface::previewImages()
 {
-    QPointer<QWindow> focusedWindow(QGuiApplication::focusWindow());
-
-    auto result = QFileDialog::getExistingDirectory(
-        nullptr,
-        caption.isEmpty() ? QCoreApplication::applicationName() : caption,
-        directory,
-        QFileDialog::ShowDirsOnly);
-
-    if (!focusedWindow.isNull())
-        focusedWindow->requestActivate();
-
-    return result;
+    return previewImages_.get();
 }
 
-QString AlgoInterface::showOpenDialog(const QString &directory, const QString &caption) const
-{
-    QPointer<QWindow> focusedWindow(QGuiApplication::focusWindow());
-
-    auto filename = QFileDialog::getOpenFileName(
-        nullptr,
-        caption.isEmpty() ? QCoreApplication::applicationName() : caption,
-        directory);
-
-    if (!focusedWindow.isNull())
-        focusedWindow->requestActivate();
-
-    return filename;
-}
 
 }

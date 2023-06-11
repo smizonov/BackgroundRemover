@@ -1,15 +1,7 @@
-#include "opencv2/imgproc.hpp"
-#include "opencv2/videoio.hpp"
-#include "opencv2/video.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/video/background_segm.hpp"
-#include <stdio.h>
+#include <opencv2/imgproc.hpp>
 #include <string>
 
 #include "MaskEditor.h"
-
-using namespace std;
-using namespace cv;
 
 namespace backgroundRemover{
 
@@ -17,24 +9,15 @@ cv::Mat tryRemoveSpot(cv::Mat image);
 
 void MaskEditor::removeNoise(cv::Mat & srcWhiteObjCV8)
 {
-    Mat temp1, temp2;
+    cv::Mat temp1, temp2;
     auto kernelSize{ std::max(1,
                              static_cast<int>(std::round(static_cast<double>(
                                                              std::max(srcWhiteObjCV8.size().height,
                                                                       srcWhiteObjCV8.size().width))
                                                          / 100))) };
-    Mat kernel(kernelSize, kernelSize, CV_8U);
-    cv::threshold(srcWhiteObjCV8, temp1, 0, 255, THRESH_BINARY | cv::THRESH_OTSU);
-//    return temp1;
-//    return srcWhiteObjCV8;
-//    return tryRemoveSpot(temp1);
-    dilate(temp1, temp2, kernel, Point(-1,-1));
-    erode(temp2, temp1, kernel, Point(-1,-1));
-    dilate(temp1, srcWhiteObjCV8, kernel, Point(-1,-1));
-//    erode(temp2, temp1, kernel, Point(-1,-1));
-//    return temp2;
-//    return temp2;
-//return tryRemoveSpot(temp2);
+    cv::Mat kernel(kernelSize, kernelSize, CV_8U);
+    cv::threshold(srcWhiteObjCV8, temp1, 2, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    cv::dilate(temp1, srcWhiteObjCV8, kernel);
 }
 
 cv::Mat tryRemoveSpot(cv::Mat image)

@@ -2,14 +2,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-
-#include "src/model/Ohlander.h"
-#include "src/model/KMeans.h"
-#include "src/model/Bgsegm.h"
-#include "src/model/Substruction.h"
 #include "AlgoInterface.h"
+#include "MetaTypeRegistrator.h"
 
-#include "src/model/SubstructionSettings.h"
 
 using namespace backgroundRemover;
 
@@ -21,6 +16,7 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
+    MetaTypeRegistrator::initMetaTypes();
     auto interface = new AlgoInterface(&app);
     engine.rootContext()->setContextProperty("viewModel", interface);
     const QUrl url(QStringLiteral("qrc:/main.qml"));
