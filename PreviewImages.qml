@@ -2,13 +2,16 @@ import QtQuick 2.11
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import Qt.labs.platform 1.1 as Platform
+import QtQuick.Controls 1.4 as OldControls
+import bgRemover 1.0
 
 Item {
-    id: previewImages
-    property var viewModel: null
+//    id: previewImages
+    required property var viewModel
 
-    width: 100
-    height: 200
+    width: 800
+    height: 400
 
     GridLayout {
         anchors.fill: parent
@@ -26,8 +29,8 @@ Item {
         Image {
             id: srcImage
             source: viewModel ? viewModel.srcImagePath : ""
-            width: 10
-            height: 20
+            Layout.preferredHeight: 200
+            Layout.preferredWidth: 100
             fillMode: Image.PreserveAspectFit
             asynchronous: true
         }
@@ -35,18 +38,17 @@ Item {
         Image {
             id: dstImage
             source: viewModel ? viewModel.dstImagePath : ""
-            width: 10
-            height: 20
+            Layout.preferredHeight: 200
+            Layout.preferredWidth: 100
             fillMode: Image.PreserveAspectFit
             asynchronous: true
         }
 
         // Second row
-        Button {
+        OldControls.Button {
             text: "Continue"
             width: srcImage / 2
 //            Layout.alignment: Qt.AlignHCenter
-            Layout.columnSpan: 2
             onClicked: {
                 if (!viewModel)
                     return
@@ -55,12 +57,14 @@ Item {
             }
         }
 
-        Button {
+        OldControls.Button {
             text: "Choose Another Algorithm"
+
             width: dstImage / 2
 //            Layout.alignment: Qt.AlignHCenter
-            Layout.columnSpan: 2
             onClicked: {
+                console.log(viewModel)
+                console.log(viewModel.srcImagePath)
                 if (!viewModel)
                     return
 

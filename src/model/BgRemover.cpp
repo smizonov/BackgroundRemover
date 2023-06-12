@@ -18,8 +18,10 @@ namespace backgroundRemover{
 
 void BgRemover::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
 {
+    using std::filesystem::directory_iterator;
     onStartPreparation(settings);
     auto countOfHandledImages{ 0 };
+    auto countOfImages{ std::distance(directory_iterator(settings->srcFolderPath()), directory_iterator{}) };
     for (auto const & path : std::filesystem::directory_iterator(settings->srcFolderPath()))
     {
         if (stopped_)
@@ -35,7 +37,7 @@ void BgRemover::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
         cv::bitwise_and(srcImage, srcImage, dstImage, mask);
         imwrite(dstPath.string(), dstImage);
 
-        handlers.onImageHandle(++countOfHandledImages);
+        handlers.onImageHandle(countOfImages, ++countOfHandledImages);
 
         if (1 == countOfHandledImages)
         {
@@ -51,12 +53,14 @@ void BgRemover::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
 void BgRemover::stop()
 {
     stopped_ = true;
+    cv_.notify_one();
 }
 
 void BgRemover::resume()
 {
     std::lock_guard lock(mutex_);
     paused_ = false;
+    cv_.notify_one();
 }
 
 }

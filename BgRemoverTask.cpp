@@ -42,9 +42,15 @@ void BgRemoverTask::resume()
 BgRemoverHandlers BgRemoverTask::bgRemoverHandlersCreator()
 {
     BgRemoverHandlers handlers;
-    handlers.onImageHandle = [this](int count)
+    handlers.onImageHandle = [this](int totalCount, int processedCount)
     {
-        emit progressChanged(static_cast<float>(count) / imageCount_);
+        if (imageCount_ != totalCount)
+        {
+            imageCount_ = totalCount;
+            emit totalImagesCountChanged(imageCount_);
+        }
+
+        emit processedImagesCountChanged(processedCount);
     };
 
     handlers.onFinish = [this](std::error_code ec)

@@ -65,8 +65,8 @@ BgRemoverSettingsPtr AlgoInterface::bgRemoverSettingsCreator()
 
 void AlgoInterface::completed()
 {
-    progress_ = 1;
-    emit progressChanged();
+    processedCount_ = 1;
+    emit processedCountChanged();
 }
 
 void AlgoInterface::start()
@@ -81,15 +81,24 @@ void AlgoInterface::start()
                 completed();
                 qInfo() << "Task completed";
             });
-    connect(task, &BgRemoverTask::progressChanged, [this](float progress)
+    connect(task, &BgRemoverTask::processedImagesCountChanged, [this](int processedCount)
             {
-                progress_ = progress;
-                emit progressChanged();
+                processedCount_ = processedCount;
+                emit processedCountChanged();
             });
+    connect(task, &BgRemoverTask::totalImagesCountChanged, [this](int processedCount)
+            {
+                totalCount_ = processedCount;
+                emit processedCountChanged();
+            });
+    connect(task, &BgRemoverTask::previewRequested, [this](...){ emit previewRequested(); });
     connect(task, &BgRemoverTask::previewRequested, previewImages_.get(), &PreviewImages::updatePath);
 
     connect(previewImages_.get(), &PreviewImages::continueSelected, task, &BgRemoverTask::resume);
     connect(previewImages_.get(), &PreviewImages::stopSelected, task, &BgRemoverTask::stop);
+
+    connect(previewImages_.get(), &PreviewImages::continueSelected, [this](...){ emit previewCancelRequested(); });
+    connect(previewImages_.get(), &PreviewImages::stopSelected, task, [this](...){ emit previewCancelRequested(); });
 
     connect(this, &AlgoInterface::stop, task, &BgRemoverTask::stop);
 
@@ -104,6 +113,7 @@ bool AlgoInterface::startEnabled()
 
 PreviewImages *AlgoInterface::previewImages()
 {
+    qInfo() << "previewImages_.get()" << previewImages_.get();
     return previewImages_.get();
 }
 

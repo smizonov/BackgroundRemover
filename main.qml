@@ -1,56 +1,79 @@
 import QtQuick.Controls 2.4
-import QtQuick.Dialogs 1.2
-import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
+//import QtQuick.Dialogs 1.2
+//import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.3
 import QtQml.Models 2.15
-import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 1.4 as OldControls
 import QtQuick 2.0
-//import Qt.labs.platform 1.1
+import Qt.labs.platform 1.1 as Platform
 import bgRemover 1.0
 import utils 1.0
 
 //window containing the application
 ApplicationWindow {
     visible: true
-//    property var sortModeModel: []
+    id: view
 
-//    readonly property var interface : dataContext
+    readonly property var previewImagesPtr: viewModel ? viewModel.previewImages : null
 
     //title of the application
     title: qsTr("Background remover")
     width: 640
-    height: 480
+    height: 500
 
-    menuBar: MenuBar {
-        Menu {
+    function previewRequested() {
+        loader.active = true
+    }
+
+    function previewCancelRequested() {
+        loader.active = false
+    }
+
+    Component.onCompleted: {
+        viewModel.previewRequested.connect(previewRequested)
+        viewModel.previewCancelRequested.connect(previewCancelRequested)
+    }
+
+    Platform.MenuBar {
+
+        id: myMenuBar
+        Platform.Menu {
             title: "File"
-            MenuItem {
+            Platform.MenuItem {
                 text: "Close"
                 onTriggered: Qt.callLater(Qt.quit)
             }
         }
 
-        Menu {
+        Platform.Menu {
             title: "Edit"
-            MenuItem {
+            Platform.MenuItem {
                 text: "Select source folder"
                 onTriggered: {
                     viewModel.srcFolder = Utils.showDirectoryDialog(
-                                StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
+                                Platform.StandardPaths.standardLocations(Platform.StandardPaths.PicturesLocation)[0],
                                 "Select source folder")
                 }
 
             }
-            MenuItem {
+            Platform.MenuItem {
                 text: "Select destination folder"
                 onTriggered: {
                     viewModel.dstFolder = Utils.showDirectoryDialog(
-                                StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
+                                Platform.StandardPaths.standardLocations(Platform.StandardPaths.PicturesLocation)[0],
                                 "Select destination folder")
                 }
             }
-            MenuItem {
+            Platform.MenuItem {
                 text: "Select background image"
                 enabled: viewModel.method === RmBgMethod.Extruction
+                onTriggered: {
+                    viewModel.bgImagePath = Utils.showOpenDialog(
+                                Platform.StandardPaths.standardLocations(Platform.StandardPaths.PicturesLocation)[0],
+                                "Select background image")
+                }
             }
         }
     }
@@ -61,15 +84,22 @@ ApplicationWindow {
         onClicked: zoomMenu.open()
     }
 
-    Item {
+    ColumnLayout {
+
+        spacing: 3
         anchors.fill: parent
 
-        Column {
-            // Add your desired layout properties
-
-            ComboBox {
+        Row {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignRight | Qt.AlignTop
+            OldControls.ComboBox {
+                id: methods
                 width: 200
                 textRole: "name"
+
+                style: ComboBoxStyle {
+                    background: systemPalette.menu
+                }
                 model: ListModel {
                     id: varietiesMethods
 
@@ -104,60 +134,13 @@ ApplicationWindow {
                 }
             }
 
-            Row {
-                Button {
-                    text: "Select source folder"
-                    onClicked: {
-                        viewModel.srcFolder = Utils.showDirectoryDialog(
-                                    StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
-                                    "Select source folder")
-                    }
-                }
-
-                Label {
-                    text: viewModel.srcFolder
-                }
-            }
-
-            Row {
-                Button {
-                    text: "Select destination folder"
-                    onClicked: {
-                        viewModel.dstFolder = Utils.showDirectoryDialog(
-                                    StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
-                                    "Select destination folder")
-                    }
-                }
-
-                Label {
-                    text: viewModel.dstFolder
-                }
-            }
-
-            Row {
-                Button {
-                    width: 350
-                    text: "Select background image (for extruction algorithm)"
-                    onClicked: {
-                        viewModel.bgImagePath = Utils.showOpenDialog(
-                                    StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0],
-                                    "Select background image")
-                    }
-                    enabled: viewModel.method === RmBgMethod.Extruction
-                }
-
-                Label {
-                    text: viewModel.bgImagePath
-                }
-            }
-
-            Button {
+            OldControls.Button {
                 text: "Start!"
                 onClicked: {
                     viewModel.start()
                 }
             }
-            Button {
+            OldControls.Button {
                 id: stopBotton
                 text: "Stop"
                 onClicked: {
@@ -165,16 +148,65 @@ ApplicationWindow {
                 }
             }
         }
-    }
 
-    ProgressBar {
+        Loader {
+            id: loader
+            //            visible: false
+            //            Layout.alignment: Qt.AlignHBottom | Qt.AlignVCenter
+            Layout.fillWidth: true
+            sourceComponent: previewImagesComponent
+            width: 800
+            height: 400
+            active: false
+
+            Component.onCompleted: {
+                console.log("loader created")
+            }
+        }
+
+        OldControls.Button {
+            id: showDstFolder
+            text: "Show images without background"
+            //            Layout.margins: 5
+            Layout.alignment: Qt.AlignHCenter
+            onClicked: {
+                console.log("srcim pah ", viewModel.previewImages.srcImagePath)
+                loader.active = true
+                //                loader.sourceComponent = previewImagesLoader
+                //                loader.item.visible = true
+            }
+        }
+
+    Component {
+        id: previewImagesComponent
+        PreviewImages {
+            viewModel: previewImagesPtr
+        }
+    }
+    Rectangle {
         id: progressBar
-        anchors.bottom: parent.bottom
-        value: viewModel.progress
-    }
+        //        color: "lightgray"
+        color: "transparent"
+        border.color: "black"
+        border.width: 2
+        width: 100
+        height: 30
+        Layout.bottomMargin: 15
+        Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
 
-    PreviewImages {
-//        visible: false
-        anchors.top: stopBotton.anchors.bottom
+        ProgressBar {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            //                anchors.centerIn: parent.Center
+            value: viewModel.processedCount / viewModel.totalCount
+            height: 15
+            //            anchors.fill: parent
+        }
+        Text {
+            anchors.centerIn: parent
+            text: viewModel.processedCount + "/" + viewModel.totalCount + " processed"
+        }
     }
+}
+
 }

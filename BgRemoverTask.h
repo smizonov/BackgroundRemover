@@ -17,14 +17,15 @@
 
 namespace backgroundRemover {
 
-class BgRemoverTask :  public QObject, public QRunnable
+class BgRemoverTask : public QObject, public QRunnable
 {
     Q_OBJECT
 
 signals:
     void taskCompleted();
     void previewRequested(QUrl srcPath, QUrl dstPath);
-    void progressChanged(float count);
+    void processedImagesCountChanged(int count);
+    void totalImagesCountChanged(int count);
 
 public:
     BgRemoverTask(
@@ -45,7 +46,7 @@ private:
 private:
     std::unique_ptr<BgRemover> remover_;
     BgRemoverSettingsPtr settings_;
-    int const imageCount_;
+    int imageCount_;
 };
 
 }

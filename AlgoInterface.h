@@ -22,7 +22,8 @@ class AlgoInterface : public QObject
     Q_PROPERTY(QString srcFolder MEMBER srcFolder_ NOTIFY srcFolderChanged);
     Q_PROPERTY(QString dstFolder MEMBER dstFolder_ NOTIFY dstFolderChanged);
     Q_PROPERTY(QString bgImagePath MEMBER bgImagePath_ NOTIFY bgImagePathChanged);
-    Q_PROPERTY(float progress MEMBER progress_ NOTIFY progressChanged);
+    Q_PROPERTY(float processedCount MEMBER processedCount_ NOTIFY processedCountChanged);
+    Q_PROPERTY(float totalCount MEMBER totalCount_ NOTIFY totalCountChanged);
     Q_PROPERTY(backgroundRemover::RmBgMethodsNamespace::RmBgMethod method MEMBER method_ NOTIFY methodChanged);
     Q_PROPERTY(bool startEnabled READ startEnabled NOTIFY startEnabledChanged);
     Q_PROPERTY(PreviewImages* previewImages READ previewImages CONSTANT);
@@ -34,9 +35,12 @@ signals:
     void srcFolderChanged();
     void dstFolderChanged();
     void bgImagePathChanged();
-    void progressChanged();
+    void processedCountChanged();
+    void totalCountChanged();
     void methodChanged();
     void startEnabledChanged();
+    void previewRequested();
+    void previewCancelRequested();
     void stop();
 
 public:
@@ -55,7 +59,8 @@ private:
     QString srcFolder_;
     QString dstFolder_;
     QString bgImagePath_;
-    float progress_{ 0.0 };
+    int processedCount_{ 0 };
+    int totalCount_{ 0 };
     RmBgMethod method_;
     std::unique_ptr<PreviewImages> previewImages_;
 };
