@@ -10,13 +10,9 @@ Item {
 //    id: previewImages
     required property var viewModel
 
-    width: 800
-    height: 400
-
     GridLayout {
         anchors.fill: parent
         columns: 2
-        rowSpacing: 10
 
         Text {
             text: "Source image"
@@ -29,8 +25,8 @@ Item {
         Image {
             id: srcImage
             source: viewModel ? viewModel.srcImagePath : ""
-            Layout.preferredHeight: 200
-            Layout.preferredWidth: 100
+            Layout.preferredHeight: 400
+            Layout.preferredWidth: 200
             fillMode: Image.PreserveAspectFit
             asynchronous: true
         }
@@ -38,13 +34,12 @@ Item {
         Image {
             id: dstImage
             source: viewModel ? viewModel.dstImagePath : ""
-            Layout.preferredHeight: 200
-            Layout.preferredWidth: 100
+            Layout.preferredHeight: 400
+            Layout.preferredWidth: 200
             fillMode: Image.PreserveAspectFit
             asynchronous: true
         }
 
-        // Second row
         OldControls.Button {
             text: "Continue"
             width: srcImage / 2
@@ -63,7 +58,6 @@ Item {
             width: dstImage / 2
 //            Layout.alignment: Qt.AlignHCenter
             onClicked: {
-                console.log(viewModel)
                 console.log(viewModel.srcImagePath)
                 if (!viewModel)
                     return

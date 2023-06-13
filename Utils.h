@@ -11,9 +11,9 @@ class Utils : public QObject
     Q_OBJECT
 
 public:
-    Q_INVOKABLE static QString showDirectoryDialog(const QString &directory, const QString &caption);
-    Q_INVOKABLE static QString showOpenDialog(const QString &directory, const QString &caption);
-    Q_INVOKABLE static void showInExplorer(const QString &directory);
+    Q_INVOKABLE static QString showDirectoryDialog(QString directory, const QString &caption);
+    Q_INVOKABLE static QString showOpenDialog(QString directory, const QString &caption);
+    Q_INVOKABLE static void showInExplorer(QString directory);
 };
 
 }

@@ -3,13 +3,15 @@
 #include <QFileDialog>
 #include <QtGui/QDesktopServices>
 #include <QWindow>
+#include <QString>
 
 namespace backgroundRemover {
 
-QString Utils::showDirectoryDialog(const QString &directory, const QString &caption)
+QString Utils::showDirectoryDialog(QString directory, const QString &caption)
 {
     QPointer<QWindow> focusedWindow(QGuiApplication::focusWindow());
 
+    directory.remove(0,8);
     auto result = QFileDialog::getExistingDirectory(
         nullptr,
         caption.isEmpty() ? QCoreApplication::applicationName() : caption,
@@ -22,10 +24,11 @@ QString Utils::showDirectoryDialog(const QString &directory, const QString &capt
     return result;
 }
 
-QString Utils::showOpenDialog(const QString &directory, const QString &caption)
+QString Utils::showOpenDialog(QString directory, const QString &caption)
 {
     QPointer<QWindow> focusedWindow(QGuiApplication::focusWindow());
 
+    directory.remove(0,8);
     auto filename = QFileDialog::getOpenFileName(
         nullptr,
         caption.isEmpty() ? QCoreApplication::applicationName() : caption,
@@ -37,7 +40,7 @@ QString Utils::showOpenDialog(const QString &directory, const QString &caption)
     return filename;
 }
 
-void Utils::showInExplorer(const QString &directory)
+void Utils::showInExplorer(QString directory)
 {
     if (directory.isEmpty())
         return;

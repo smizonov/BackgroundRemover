@@ -154,12 +154,10 @@ ApplicationWindow {
 
         Loader {
             id: loader
-            //            visible: false
-            //            Layout.alignment: Qt.AlignHBottom | Qt.AlignVCenter
             Layout.fillWidth: true
             sourceComponent: previewImagesComponent
             width: 800
-            height: 400
+            height: 350
             active: false
 
             Component.onCompleted: {
@@ -185,7 +183,7 @@ ApplicationWindow {
     }
     Rectangle {
 
-        //        color: "lightgray"
+//        color: "lightgray"
 //        color: "transparent"
 //        border.color: "black"
 //        border.width: 2
@@ -205,7 +203,7 @@ ApplicationWindow {
             background: Rectangle {
                 anchors.fill: progressBar
                 color: "lightgray"
-//                radius: 4
+                radius: 4
             }
 
             contentItem: Rectangle {
@@ -214,9 +212,8 @@ ApplicationWindow {
                 height: progressBar.height
                 width: progressBar.value === 0 ? progressBar.width : progressBar.width * progressBar.value
                 color: "lightgreen"
-//                radius: 4
+                radius: 4
             }
-            //            anchors.fill: parent
         }
         Text {
             anchors.centerIn: parent
