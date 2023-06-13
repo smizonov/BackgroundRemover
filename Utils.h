@@ -13,6 +13,7 @@ class Utils : public QObject
 public:
     Q_INVOKABLE static QString showDirectoryDialog(const QString &directory, const QString &caption);
     Q_INVOKABLE static QString showOpenDialog(const QString &directory, const QString &caption);
+    Q_INVOKABLE static void showInExplorer(const QString &directory);
 };
 
 }

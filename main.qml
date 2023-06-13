@@ -135,7 +135,9 @@ ApplicationWindow {
             }
 
             OldControls.Button {
+                id: startBotton
                 text: "Start!"
+                enabled: viewModel.srcFolder !== "" && viewModel.dstFolder !== ""
                 onClicked: {
                     viewModel.start()
                 }
@@ -143,6 +145,7 @@ ApplicationWindow {
             OldControls.Button {
                 id: stopBotton
                 text: "Stop"
+                enabled: startBotton.enabled
                 onClicked: {
                     viewModel.stop()
                 }
@@ -170,10 +173,7 @@ ApplicationWindow {
             //            Layout.margins: 5
             Layout.alignment: Qt.AlignHCenter
             onClicked: {
-                console.log("srcim pah ", viewModel.previewImages.srcImagePath)
-                loader.active = true
-                //                loader.sourceComponent = previewImagesLoader
-                //                loader.item.visible = true
+                Utils.showInExplorer(viewModel.dstFolder)
             }
         }
 
@@ -184,22 +184,38 @@ ApplicationWindow {
         }
     }
     Rectangle {
-        id: progressBar
+
         //        color: "lightgray"
-        color: "transparent"
-        border.color: "black"
-        border.width: 2
-        width: 100
+//        color: "transparent"
+//        border.color: "black"
+//        border.width: 2
+        width: 300
         height: 30
         Layout.bottomMargin: 15
         Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
 
         ProgressBar {
+            id: progressBar
+
+            anchors.fill: parent
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            //                anchors.centerIn: parent.Center
             value: viewModel.processedCount / viewModel.totalCount
             height: 15
+            background: Rectangle {
+                anchors.fill: progressBar
+                color: "lightgray"
+//                radius: 4
+            }
+
+            contentItem: Rectangle {
+                anchors.left: progressBar.left
+                anchors.bottom: progressBar.bottom
+                height: progressBar.height
+                width: progressBar.value === 0 ? progressBar.width : progressBar.width * progressBar.value
+                color: "lightgreen"
+//                radius: 4
+            }
             //            anchors.fill: parent
         }
         Text {

@@ -65,8 +65,8 @@ BgRemoverSettingsPtr AlgoInterface::bgRemoverSettingsCreator()
 
 void AlgoInterface::completed()
 {
-    processedCount_ = 1;
-    emit processedCountChanged();
+//    processedCount_ = 1;
+//    emit processedCountChanged();
 }
 
 void AlgoInterface::start()

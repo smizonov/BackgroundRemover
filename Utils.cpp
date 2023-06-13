@@ -1,6 +1,7 @@
 #include "Utils.h"
 
 #include <QFileDialog>
+#include <QtGui/QDesktopServices>
 #include <QWindow>
 
 namespace backgroundRemover {
@@ -34,6 +35,14 @@ QString Utils::showOpenDialog(const QString &directory, const QString &caption)
         focusedWindow->requestActivate();
 
     return filename;
+}
+
+void Utils::showInExplorer(const QString &directory)
+{
+    if (directory.isEmpty())
+        return;
+
+    QDesktopServices::openUrl(QUrl::fromLocalFile(directory));
 }
 
 }
