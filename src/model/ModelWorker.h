@@ -22,5 +22,5 @@ private:
     std::vector<std::string> const layerNames_;
 };
 
-using ModelWorkerUniquePtr = std::unique_ptr<ModelWorker>;
+using ModelWorkerPtr = std::shared_ptr<ModelWorker>;
 }

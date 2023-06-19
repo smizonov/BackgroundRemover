@@ -1,7 +1,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <functional>
-#include "src/model/SubstructionSettings.h"
+#include <QApplication>
+//#include "src/model/SubstructionSettings.h"
+
+#include <iostream>
 
 #include "BgRemoverTask.h"
 
@@ -20,6 +23,8 @@ void BgRemoverTask::run()
 {
     try
     {
+        elapsedTimer_ = std::make_unique<QElapsedTimer>();
+        elapsedTimer_->start();
         remover_->start(settings_, bgRemoverHandlersCreator());
     }
     catch(std::exception & ec)
@@ -28,14 +33,20 @@ void BgRemoverTask::run()
     }
 }
 
+int BgRemoverTask::getElapsedTime()
+{
+    return (elapsedTimer_ ? elapsedTimer_->elapsed() : 0) + invocationTimeInMsec_;
+}
+
 void BgRemoverTask::stop()
 {
     remover_->stop();
-    resume();
 }
 
 void BgRemoverTask::resume()
 {
+    elapsedTimer_.reset(new QElapsedTimer());
+    elapsedTimer_->start();
     remover_->resume();
 }
 
@@ -55,12 +66,17 @@ BgRemoverHandlers BgRemoverTask::bgRemoverHandlersCreator()
 
     handlers.onFinish = [this](std::error_code ec)
     {
+        invocationTimeInMsec_ = getElapsedTime();
+        elapsedTimer_.reset();
+
         emit taskCompleted();
     };
     handlers.previewImagePathsReceived = [this](std::filesystem::path srcIm, std::filesystem::path dstIm)
     {
         QUrl src = QUrl::fromLocalFile(QString::fromStdString(srcIm.generic_string()));
         QUrl dst = QUrl::fromLocalFile(QString::fromStdString(dstIm.generic_string()));
+        invocationTimeInMsec_ = getElapsedTime();
+        elapsedTimer_.reset();
         emit previewRequested(src, dst);
     };
     return handlers;

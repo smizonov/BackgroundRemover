@@ -25,7 +25,7 @@ Item {
         Image {
             id: srcImage
             source: viewModel ? viewModel.srcImagePath : ""
-            Layout.preferredHeight: 400
+            Layout.preferredHeight: 350
             Layout.preferredWidth: 200
             fillMode: Image.PreserveAspectFit
             asynchronous: true
@@ -34,7 +34,7 @@ Item {
         Image {
             id: dstImage
             source: viewModel ? viewModel.dstImagePath : ""
-            Layout.preferredHeight: 400
+            Layout.preferredHeight: 350
             Layout.preferredWidth: 200
             fillMode: Image.PreserveAspectFit
             asynchronous: true

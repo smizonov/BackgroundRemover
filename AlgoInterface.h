@@ -7,14 +7,15 @@
 #include "src/model/Ohlander.h"
 #include "src/model/KMeans.h"
 #include "src/model/BgRemover.h"
-#include "src/model/Bgsegm.h"
+#include "src/model/DisModelWorker.h"
+#include "src/model/U2ModelWorker.h"
 #include "src/model/Substruction.h"
 #include "RmBgMethods.h"
+#include "Fwd.h"
 #include "PreviewImages.h"
 
 namespace backgroundRemover {
 
-using BgRemoverPtr = std::unique_ptr<BgRemover>;
 class AlgoInterface : public QObject
 {
     Q_OBJECT
@@ -42,6 +43,7 @@ signals:
     void previewRequested();
     void previewCancelRequested();
     void stop();
+    void elapsedTimeChanged(int time);
 
 public:
     Q_INVOKABLE void start();
@@ -59,9 +61,13 @@ private:
     QString srcFolder_;
     QString dstFolder_;
     QString bgImagePath_;
+    std::shared_ptr<U2ModelWorker> u2ModelWorker_;
+    std::shared_ptr<DisModelWorker> disModelWorker_;
     int processedCount_{ 0 };
     int totalCount_{ 0 };
     RmBgMethod method_;
+    std::unique_ptr<QTimer> timer_;
+    std::unique_ptr<BgRemoverTask> task_;
     std::unique_ptr<PreviewImages> previewImages_;
 };
 

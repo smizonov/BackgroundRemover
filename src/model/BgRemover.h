@@ -33,6 +33,8 @@ protected:
     virtual cv::Mat getObjectMask(cv::Mat const & image) = 0;
     virtual void postProcessingMask(cv::Mat & image) = 0;
 
+private:
+    void saveTime();
 protected:
     bool stopped_{ false };
     bool paused_{ false };

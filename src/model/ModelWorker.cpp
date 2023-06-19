@@ -10,6 +10,7 @@ ModelWorker::ModelWorker(std::filesystem::path path)
     : net_(cv::dnn::readNetFromONNX(path.string()))
     , layerNames_(net_.getUnconnectedOutLayersNames())
 {
+//    if (cv::ocl::)
 //    net_.setPreferableTarget(cv::dnn::DNN_TARGET_OPENCL);
 }
 

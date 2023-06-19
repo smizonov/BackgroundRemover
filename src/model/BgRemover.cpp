@@ -53,6 +53,7 @@ void BgRemover::start(BgRemoverSettingsPtr settings, BgRemoverHandlers handlers)
 void BgRemover::stop()
 {
     stopped_ = true;
+    paused_ = false;
     cv_.notify_one();
 }
 

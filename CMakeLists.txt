@@ -28,6 +28,7 @@ set(PROJECT_SOURCES
         PreviewImages.cpp
         MetaTypeRegistrator.h
         MetaTypeRegistrator.cpp
+        Fwd.h
 )
 
 add_subdirectory(src/model)

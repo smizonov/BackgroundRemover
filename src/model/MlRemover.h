@@ -8,7 +8,7 @@ namespace backgroundRemover{
 class MlRemover: public BgRemover
 {
 public:
-    MlRemover(ModelWorkerUniquePtr &&);
+    MlRemover(ModelWorkerPtr const &);
 protected:
     void onStartPreparation(BgRemoverSettingsPtr) override {}
     cv::Mat getObjectMask(cv::Mat const & image) override;
@@ -16,7 +16,7 @@ protected:
     void startImpl(std::filesystem::path srcPath, std::filesystem::path dstPath);
 
 private:
-    ModelWorkerUniquePtr model_;
+    ModelWorkerPtr model_;
 };
 
 }

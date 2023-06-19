@@ -36,9 +36,13 @@ std::unique_ptr<BgRemover> AlgoInterface::bgRemoverCreator()
     case RmBgMethod::Extruction:
         return std::make_unique<Substruction>();
     case RmBgMethod::MLU2net:
-        return std::make_unique<MlRemover>(std::make_unique<U2ModelWorker>());
+        if (!u2ModelWorker_)
+            u2ModelWorker_ = std::make_shared<U2ModelWorker>();
+        return std::make_unique<MlRemover>(u2ModelWorker_);
     case RmBgMethod::MLDis:
-        return std::make_unique<MlRemover>(std::make_unique<DisModelWorker>());
+        if (!disModelWorker_)
+            disModelWorker_ = std::make_shared<DisModelWorker>();
+        return std::make_unique<MlRemover>(disModelWorker_);
     }
     return nullptr;
 }
@@ -66,7 +70,21 @@ BgRemoverSettingsPtr AlgoInterface::bgRemoverSettingsCreator()
 void AlgoInterface::completed()
 {
 //    processedCount_ = 1;
-//    emit processedCountChanged();
+    //    emit processedCountChanged();
+}
+
+auto invokeInContextThread(QObject * obj)
+{
+    return [obj](std::function<void()> fun)
+    {
+        QMetaObject::invokeMethod(
+                obj,
+                [fun { std::move(fun) }]() mutable
+                {
+                    fun();
+                },
+                Qt::QueuedConnection);
+    };
 }
 
 void AlgoInterface::start()
@@ -74,35 +92,46 @@ void AlgoInterface::start()
     auto settings = bgRemoverSettingsCreator();
     auto remover = bgRemoverCreator();
     QDir dir(srcFolder_);
-    auto task = new BgRemoverTask(std::move(remover), std::move(settings), dir.count());
-    task->setAutoDelete(true);
-    connect(task, &BgRemoverTask::taskCompleted, [this]()
+    task_ = std::make_unique<BgRemoverTask>(std::move(remover), std::move(settings), dir.count());
+    task_->setAutoDelete(false);
+    connect(task_.get(), &BgRemoverTask::taskCompleted, [this]()
             {
                 completed();
+                task_.reset();
                 qInfo() << "Task completed";
             });
-    connect(task, &BgRemoverTask::processedImagesCountChanged, [this](int processedCount)
+    connect(task_.get(), &BgRemoverTask::processedImagesCountChanged, [this](int processedCount)
             {
                 processedCount_ = processedCount;
                 emit processedCountChanged();
             });
-    connect(task, &BgRemoverTask::totalImagesCountChanged, [this](int processedCount)
+    connect(task_.get(), &BgRemoverTask::totalImagesCountChanged, [this](int processedCount)
             {
                 totalCount_ = processedCount;
                 emit processedCountChanged();
             });
-    connect(task, &BgRemoverTask::previewRequested, [this](...){ emit previewRequested(); });
-    connect(task, &BgRemoverTask::previewRequested, previewImages_.get(), &PreviewImages::updatePath);
 
-    connect(previewImages_.get(), &PreviewImages::continueSelected, task, &BgRemoverTask::resume);
-    connect(previewImages_.get(), &PreviewImages::stopSelected, task, &BgRemoverTask::stop);
+    connect(task_.get(), &BgRemoverTask::previewRequested, [this](...){ emit previewRequested(); });
+    connect(task_.get(), &BgRemoverTask::previewRequested, previewImages_.get(), &PreviewImages::updatePath);
+
+    connect(task_.get(), &BgRemoverTask::elapsedTimeChanged, this, &AlgoInterface::elapsedTimeChanged);
+    connect(previewImages_.get(), &PreviewImages::continueSelected, task_.get(), &BgRemoverTask::resume);
+    connect(previewImages_.get(), &PreviewImages::stopSelected, task_.get(), &BgRemoverTask::stop);
 
     connect(previewImages_.get(), &PreviewImages::continueSelected, [this](...){ emit previewCancelRequested(); });
-    connect(previewImages_.get(), &PreviewImages::stopSelected, task, [this](...){ emit previewCancelRequested(); });
+    connect(previewImages_.get(), &PreviewImages::stopSelected, [this](...){ emit previewCancelRequested(); });
 
-    connect(this, &AlgoInterface::stop, task, &BgRemoverTask::stop);
+    connect(this, &AlgoInterface::stop, task_.get(), &BgRemoverTask::stop);
 
-    QThreadPool::globalInstance()->start(task);
+    timer_ = std::make_unique<QTimer>();
+    connect(timer_.get(), &QTimer::timeout, this, [this]
+    {
+        if (task_)
+        emit elapsedTimeChanged(task_->getElapsedTime());
+    });
+    timer_->start(1000);
+
+    QThreadPool::globalInstance()->start(task_.get());
 }
 
 bool AlgoInterface::startEnabled()

@@ -2,8 +2,6 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include "MlRemover.h"
-#include <DisModelWorker.h>
-#include <U2ModelWorker.h>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -23,8 +21,8 @@ cv::Mat convertToMask(cv::Mat& ort_outs, const cv::Mat& inputImage)
     return uint8Mat;
 }
 
-MlRemover::MlRemover(ModelWorkerUniquePtr && model)
-    : model_(std::move(model))
+MlRemover::MlRemover(ModelWorkerPtr const & model)
+    : model_(model)
 {
     if (!model_)
         throw std::runtime_error("MlRemover::MlRemover: model is nullptr");

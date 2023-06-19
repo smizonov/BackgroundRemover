@@ -3,15 +3,13 @@
 #include <QRunnable>
 #include <QObject>
 #include <QString>
+#include <QElapsedTimer>
+#include <QTimer>
 #include <QDir>
 
-#include "src/model/Ohlander.h"
-#include "src/model/KMeans.h"
 #include "src/model/BgRemover.h"
-#include "src/model/Bgsegm.h"
-#include "src/model/Substruction.h"
-#include "RmBgMethods.h"
-#include "AlgoInterface.h"
+#include "Fwd.h"
+//#include "AlgoInterface.h"
 
 #include <QUrl>
 
@@ -26,6 +24,7 @@ signals:
     void previewRequested(QUrl srcPath, QUrl dstPath);
     void processedImagesCountChanged(int count);
     void totalImagesCountChanged(int count);
+    void elapsedTimeChanged(int count);
 
 public:
     BgRemoverTask(
@@ -35,6 +34,7 @@ public:
 
 public:
     void run() override;
+    int getElapsedTime();
 
 public slots:
     void stop();
@@ -47,6 +47,9 @@ private:
     std::unique_ptr<BgRemover> remover_;
     BgRemoverSettingsPtr settings_;
     int imageCount_;
+    int invocationTimeInMsec_{ 0 };
+//    std::unique_ptr<QTimer> timer_;
+    std::unique_ptr<QElapsedTimer> elapsedTimer_;
 };
 
 }

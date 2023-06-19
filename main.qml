@@ -21,7 +21,7 @@ ApplicationWindow {
     //title of the application
     title: qsTr("Background remover")
     width: 640
-    height: 500
+    height: 600
 
     function previewRequested() {
         loader.active = true
@@ -31,9 +31,15 @@ ApplicationWindow {
         loader.active = false
     }
 
+    function elapsedTimeChanged(time) {
+        console.log(time)
+        timeText.text = Math.floor(time / 1000) + " sec"
+    }
+
     Component.onCompleted: {
         viewModel.previewRequested.connect(previewRequested)
         viewModel.previewCancelRequested.connect(previewCancelRequested)
+        viewModel.elapsedTimeChanged.connect(elapsedTimeChanged)
     }
 
     Platform.MenuBar {
@@ -154,22 +160,18 @@ ApplicationWindow {
 
         Loader {
             id: loader
+            width: 800
+            height: 400
             Layout.fillWidth: true
             sourceComponent: previewImagesComponent
-            width: 800
-            height: 350
             active: false
-
-            Component.onCompleted: {
-                console.log("loader created")
-            }
         }
 
         OldControls.Button {
             id: showDstFolder
             text: "Show images without background"
             //            Layout.margins: 5
-            Layout.alignment: Qt.AlignHCenter
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             onClicked: {
                 Utils.showInExplorer(viewModel.dstFolder)
             }
@@ -182,12 +184,11 @@ ApplicationWindow {
         }
     }
     Rectangle {
-
 //        color: "lightgray"
 //        color: "transparent"
 //        border.color: "black"
 //        border.width: 2
-        width: 300
+        width: view.width
         height: 30
         Layout.bottomMargin: 15
         Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
@@ -195,11 +196,12 @@ ApplicationWindow {
         ProgressBar {
             id: progressBar
 
-            anchors.fill: parent
+//            anchors.fill: parent
+            height: parent.height
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             value: viewModel.processedCount / viewModel.totalCount
-            height: 15
+            width: 300
             background: Rectangle {
                 anchors.fill: progressBar
                 color: "lightgray"
@@ -218,6 +220,13 @@ ApplicationWindow {
         Text {
             anchors.centerIn: parent
             text: viewModel.processedCount + "/" + viewModel.totalCount + " processed"
+        }
+
+        Text {
+            id: timeText
+            anchors.right: parent.right
+            anchors.margins: 5
+            anchors.verticalCenter: progressBar.verticalCenter
         }
     }
 }
